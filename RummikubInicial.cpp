@@ -194,7 +194,10 @@ void obtenerFicha(tBolsa& bolsa, tSoportes& soportes, int fila, int columna, int
 		soportes[turno].contador++;
 	}
 }
-
+void mostrarFicha(const tFicha& ficha)
+{
+	cout << toString(ficha.color) << " " << ficha.numero << "  ";
+}
 void mostrarBolsa(const tBolsa& bolsa, int numFichas)
 {
 	cout << endl << "Bolsa..." << endl;
@@ -208,7 +211,7 @@ void mostrarBolsa(const tBolsa& bolsa, int numFichas)
 			}
 			else
 			{
-				cout << toString(bolsa.bolsaFicha[i][j].color) << " " << bolsa.bolsaFicha[i][j].numero << "  ";
+				mostrarFicha(bolsa.bolsaFicha[i][j]);
 			}
 		}
 		cout << endl;
@@ -220,9 +223,26 @@ void mostrarSoporte(const tSoporte& soporte)
 	cout << "Soporte:";
 	for (int i = 0; i < soporte.contador; i++)
 	{
-		cout << " " << toString(soporte.ficha[i].color) << " " << soporte.ficha[i].numero << " ";
+		mostrarFicha(soporte.ficha[i]);
 	}
 	cout << endl << endl;
+}
+void mostrarJugada(const tJugada& jugada, int numFichas)
+{
+	int i = 0;
+	cout << "Jugada: ";
+	while(jugada[i].numero < numFichas && jugada[i].numero > 0)
+	{
+		mostrarFicha(jugada[i]);
+		i++;
+	}
+}
+void mostrarTablero(const tTablero& tablero)
+{
+	for (int i = 0; i < tablero.contador; i++)
+	{
+
+	}
 }
 
 string toString(tColor color)
@@ -398,20 +418,18 @@ void eliminarFichas(tSoporte& soporte, const tJugada& jugada)
 {
 	for (int i = 0; i < soporte.contador; i++) {
 
-		if (buscar(jugada, soporte.ficha[i]) != -1) {
-
+		if (buscar(jugada, soporte.ficha[i]) != -1) 
+		{
 			soporte.ficha[i].color = libre;
 			soporte.ficha[i].numero = -1;
 		}
 	}
-
-
 }
 void resuelveCaso()
 {
 	tBolsa bolsa;
 	tSoportes soportes;
-	int numFichas, iniFichas, numJugadores, fila, columna, turno, opcion;
+	int numFichas, iniFichas, numJugadores, fila, columna, turno, opcion,numFicha;
 	cin >> numFichas;
 	cin >> iniFichas;
 	cin >> numJugadores;
@@ -443,21 +461,35 @@ void resuelveCaso()
 			mostrarSoporte(soportes[turno]);
 			turno = avanzarTurno(numJugadores, turno);
 			cout << "Turno para el jugador " << turno + 1 << " ..." << endl;
+			mostrarSoporte(soportes[turno]);
 		}
 		else if (opcion == 1)
 		{
 			ordenarPorNum(soportes[turno], numFichas);
+			mostrarSoporte(soportes[turno]);
 		}
 		else if (opcion == 2)
 		{
 			ordenarPorColor(soportes[turno], numFichas);
+			mostrarSoporte(soportes[turno]);
 		}
 		else if (opcion == 3)
 		{
 			mostrarEscaleras(soportes[turno], numFichas);
 			mostrarSeries(soportes[turno], numFichas);
+			mostrarSoporte(soportes[turno]);
 		}
-		mostrarSoporte(soportes[turno]);
+		else if (opcion == 4)
+		{
+			do
+			{
+				cin >> numFicha;
+				if(numFicha != 0)
+				{
+
+				}
+			} while (numFicha == 0);
+		}
 	} while (opcion != -1);
 
 }
