@@ -1,4 +1,3 @@
-
 // Autor/a: Nombre y apellidos
 #include <iostream>
 #include <stdlib.h>
@@ -62,8 +61,8 @@ void ordenarPorNum(tSoporte& soporte, int numFichas);
 void obtenerFicha(tBolsa& bolsa, tSoportes& soportes, int fila, int columna, int turno, int numFichas);
 void mostrarSeries(const tSoporte& soporte);
 void mostrarEscaleras(const tSoporte& soporte);
-
-
+void eliminarFichas(tSoporte& soporte, const tJugada jugada);
+int buscar(const tJugada& jugada, const tFicha& ficha);
 
 
 int main() {
@@ -90,7 +89,7 @@ int menu()
 {
 	int opcion;
 	cin >> opcion;
-	if(opcion != -1)
+	if (opcion != -1)
 	{
 		cout << "1: Ordenar por num., 2: Ordenar por color, 3: Sugerir, 4: Poner, 0: Fin >>> ";
 		cout << opcion << endl;
@@ -311,54 +310,22 @@ int avanzarTurno(int numJugadores, int turno)
 	}
 	return turno;
 }
-void mostrarSeries(tSoporte& soporte,int numFichas)
+void mostrarSeries(tSoporte& soporte, int numFichas)
 {
 	int jugada = 0;
 
 	ordenarPorNum(soporte, numFichas);
 
-	for(int i = 0; i < soporte.contador - 2; i++)
-	{
-		jugada++;
-		if(soporte.ficha[i].numero == soporte.ficha[i + 1].numero && soporte.ficha[i].color != soporte.ficha[i + 1].color)
-		{
-			jugada++;
-			if(soporte.ficha[i + 1].numero == soporte.ficha[i + 2].numero && soporte.ficha[i + 1].color != soporte.ficha[i + 2].color)
-			{
-				jugada++;
-				if(soporte.ficha[i + 2].numero == soporte.ficha[i + 3].numero && soporte.ficha[i + 2].color != soporte.ficha[i + 3].color)
-				{
-					jugada++;
-				}
-			}
-		}
-		if(jugada >= 3)
-		{
-			for(int j = i; j < i + jugada; j++)
-			{
-				cout << toString(soporte.ficha[j].color) << " " << soporte.ficha[j].numero << "  ";
-			}
-			cout << endl;
-		}
-		jugada = 0;
-	}
-}
-void mostrarEscaleras(tSoporte& soporte, int numFichas)
-{
-	int jugada = 0;
-
-	ordenarPorColor(soporte, numFichas);
-
 	for (int i = 0; i < soporte.contador - 2; i++)
 	{
 		jugada++;
-		if (soporte.ficha[i].color == soporte.ficha[i + 1].color && soporte.ficha[i].numero + 1 == soporte.ficha[i + 1].numero)
+		if (soporte.ficha[i].numero == soporte.ficha[i + 1].numero && soporte.ficha[i].color != soporte.ficha[i + 1].color)
 		{
 			jugada++;
-			if (soporte.ficha[i + 1].color == soporte.ficha[i + 2].color && soporte.ficha[i + 1].numero + 1 == soporte.ficha[i + 2].numero)
+			if (soporte.ficha[i + 1].numero == soporte.ficha[i + 2].numero && soporte.ficha[i + 1].color != soporte.ficha[i + 2].color)
 			{
 				jugada++;
-				if (soporte.ficha[i + 2].color == soporte.ficha[i + 3].color && soporte.ficha[i + 2].numero + 1 == soporte.ficha[i + 3].numero)
+				if (soporte.ficha[i + 2].numero == soporte.ficha[i + 3].numero && soporte.ficha[i + 2].color != soporte.ficha[i + 3].color)
 				{
 					jugada++;
 				}
@@ -374,6 +341,64 @@ void mostrarEscaleras(tSoporte& soporte, int numFichas)
 		}
 		jugada = 0;
 	}
+}
+void mostrarEscaleras(tSoporte& soporte, int numFichas)
+{
+	tSoporte aux;
+	bool escalera = true;
+	ordenarPorColor(soporte, numFichas);
+
+	for (int t= 0; t < soporte.contador - 2; t++)
+	{
+		int numiguales = 0;
+		escalera = true;
+
+		while (escalera) {
+			numiguales++;
+			if (soporte.ficha[t].color != soporte.ficha[t + numiguales].color && soporte.ficha[t].numero + numiguales != soporte.ficha[t + numiguales].numero) {
+				{
+					if (numiguales >= 3)
+					{
+						for (int j = t; j < t + numiguales; j++)
+						{
+							cout << toString(soporte.ficha[j].color) << " " << soporte.ficha[j].numero << "  ";
+						}
+						cout << endl;
+					}
+					escalera = false;
+				}
+			}	
+		}
+		
+	}
+}
+int buscar(const tJugada& jugada, const tFicha& ficha)
+{
+	bool encontrado = false;
+	int vueltas = 0, indice = -1;
+	while (!encontrado && vueltas < NumFichas + 1)
+	{
+		if (jugada[vueltas].color == ficha.color && jugada[vueltas].numero == ficha.numero)
+		{
+			indice = vueltas;
+			encontrado = true;
+		}
+		vueltas++;
+	}
+	return indice;
+}
+void eliminarFichas(tSoporte& soporte, const tJugada& jugada)
+{
+	for (int i = 0; i < soporte.contador; i++) {
+
+		if (buscar(jugada, soporte.ficha[i]) != -1) {
+
+			soporte.ficha[i].color = libre;
+			soporte.ficha[i].numero = -1;
+		}
+	}
+
+
 }
 void resuelveCaso()
 {
@@ -420,7 +445,7 @@ void resuelveCaso()
 		{
 			ordenarPorColor(soportes[turno], numFichas);
 		}
-		else if(opcion == 3)
+		else if (opcion == 3)
 		{
 			mostrarEscaleras(soportes[turno], numFichas);
 			mostrarSeries(soportes[turno], numFichas);
