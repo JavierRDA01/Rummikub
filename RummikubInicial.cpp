@@ -1,3 +1,4 @@
+// Autor/a: Nombre y apellidos
 #include <iostream>
 #include <stdlib.h>
 #include <string>
@@ -5,11 +6,10 @@
 #include <iomanip>
 #include <time.h>
 
-
 using namespace std;
 
 const int NumJugadores = 3;
-const int  NumFichas = 10;
+const int NumFichas = 10;
 const int IniFichas = 7;
 const int MaxFichas = 50;
 const int MaxJugadas = NumFichas * 2;
@@ -17,15 +17,15 @@ const int MaxJugadas = NumFichas * 2;
 typedef enum { rojo, verde, azul, amarillo, blanco, libre }tColor;
 
 struct tFicha {
-	int numero;
-	tColor color;
+	int numero = -1;
+	tColor color = libre;
 };
 
-typedef tFicha tArray[MaxFichas];
+typedef tFicha tArrayFichas[MaxFichas];
 
 struct tSoporte {
 	int contador = 0;
-	tArray ficha;
+	tArrayFichas ficha;
 };
 
 typedef tSoporte tSoportes[NumJugadores];
@@ -48,150 +48,453 @@ struct tTablero
 };
 
 int menu();
-void inicializarBolsa(tBolsa& bolsa);
-tFicha robar(tBolsa& bolsa);
-bool recorrerBolsa(tBolsa& bolsa, int& fila, int& columna, tFicha& ficha);
-void repartir(tBolsa& bolsa, tSoportes& soportes);
-void ordenarPorColor(tSoporte& soporte);
-void ordenarPorNum(tSoporte& soporte);
+void inicializarBolsa(tBolsa& bolsa, int numFichas);
+void repartir(tBolsa& bolsa, tSoportes& soportes, int numFichas, int numJugadores, int iniFichas);
+tFicha robar(tBolsa& bolsa, int fila, int columna, int numFichas);
+void mostrarBolsa(const tBolsa& bolsa, int numFichas);
+void mostrarSoporte(const tSoporte& soporte);
+bool recorrerBolsa(tBolsa& bolsa, int& fila, int& columna, int numFichas);
+string toString(tColor color);
+void resuelveCaso();
+void ordenarPorColor(tSoporte& soporte, int numFichas);
+void ordenarPorNum(tSoporte& soporte, int numFichas);
+void obtenerFicha(tBolsa& bolsa, tSoportes& soportes, int fila, int columna, int turno, int numFichas);
+void mostrarSeries(const tSoporte& soporte);
+void mostrarEscaleras(const tSoporte& soporte);
+void eliminarFichas(tSoporte& soporte, const tJugada& jugada);
 int buscar(const tJugada& jugada, const tFicha& ficha);
-void eliminaFichas(tSoporte& soporte, const tJugada& jugada);
 int nuevaJugada(tSoporte& soporte, tJugada& jugada);
-void mostrar(const tSoporte& soporte);
-bool ponerFicha(tJugada& jugada, tFicha& ficha);
+void hacerEscaleras(tSoporte& soporte, int numFichas);
 
 
-int main()
-{
-	srand(time(NULL));
+
+int main() {
+	// ajustes para que cin extraiga directamente de un fichero
+#ifndef DOMJUDGE
+	std::ifstream in("datos.in");
+	auto cinbuf = std::cin.rdbuf(in.rdbuf());
+	std::ofstream out("datos.out");
+	auto coutbuf = std::cout.rdbuf(out.rdbuf());
+#endif
+
+	resuelveCaso();
+
+	// para dejar todo como estaba al principio
+#ifndef DOMJUDGE
+	std::cin.rdbuf(cinbuf);
+	std::cout.rdbuf(coutbuf);
+	system("PAUSE");
+#endif
 	return 0;
 }
 
 int menu()
 {
 	int opcion;
-	cout << "1: Ordenar por num., 2: Ordenar por color, 3: Sugerir, 4: Poner, 0: Fin >>> ";
 	cin >> opcion;
-	cout << opcion << endl;
+	if (opcion != -1)
+	{
+		cout << "1: Ordenar por num., 2: Ordenar por color, 3: Sugerir, 4: Poner, 0: Fin >>> ";
+		cout << opcion << endl;
+	}
+	return opcion;
 }
 
-void inicializarBolsa(tBolsa& bolsa)
+void inicializarBolsa(tBolsa& bolsa, int numFichas)
 {
-	for (int i = 0; i < 8; i++)
+	for (int i = 0; i < 8; i++)//Por cada fila
 	{
-		for (int j = 0; j < NumFichas; j++)
+		for (int j = 0; j < numFichas; j++)//Por cada columna
 		{
-			bolsa.bolsaFicha[i][j].numero = j + 1;
+			bolsa.bolsaFicha[i][j].numero = j + 1;//Rellena cada ficha con su número corresponiente
 
-			if (i < 4)
-				bolsa.bolsaFicha[i][j].color = tColor(i);
-
+			if (i < 4)//Rellena cada ficha con su color correspondiente.
+			{
+				bolsa.bolsaFicha[i][j].color = tColor(i);//Si es menor que 4 coge el color de i
+			}
 			else
-				bolsa.bolsaFicha[i][j].color = tColor(i - 4);
+			{
+				bolsa.bolsaFicha[i][j].color = tColor(i - 4);//Si es mayor que 4 vuelve a rellenar desde el primer color para que haya 2 fichas de cada color con el mismo número
+			}
 		}
 	}
 }
-
-tFicha robar(tBolsa& bolsa)
+tFicha robar(tBolsa& bolsa, int fila, int columna, int numFichas)
 {
 	bool encontrado = false;
 	tFicha ficha;
-	ficha.color = libre;
-	ficha.numero = -1;
-	int fila = rand() % 8, columna = rand() % NumFichas;
-	if (bolsa.bolsaFicha[fila][columna].color != libre)
+	ficha.color = libre;//Inicializamos la ficha
+	ficha.numero = -1;//Inicializamos la ficha
+	if (bolsa.bolsaFicha[fila][columna].numero == -1) //Si la ficha de la posición introducida está libre, entonces busca la siguiente icha a partir de esa posición
 	{
-		ficha = bolsa.bolsaFicha[fila][columna];
+		encontrado = recorrerBolsa(bolsa, fila, columna, numFichas);//Busca la ficha
 
-		bolsa.bolsaFicha[fila][columna].color = libre;
-		bolsa.bolsaFicha[fila][columna].numero = -1;
-
-		encontrado = true;
 	}
 	else
 	{
-		encontrado = recorrerBolsa(bolsa, fila, columna, ficha);
-
+		encontrado = true;//Si encuentra la ficha
 	}
-	if (!encontrado)
+	if (!encontrado)//Si no encuentra la ficha comienza a buscar desde el principio
 	{
 		fila = 0;
 		columna = 0;
-		encontrado = recorrerBolsa(bolsa, fila, columna, ficha);
+		encontrado = recorrerBolsa(bolsa, fila, columna, numFichas);//Busca la ficha
+	}
+	if (encontrado)
+	{
+		ficha = bolsa.bolsaFicha[fila][columna];//Si finalmente encuentra la ficha, coge la ficha a partir de la posición encontrada
+		bolsa.bolsaFicha[fila][columna].color = libre;//Libera la posición donde esta guardada la ficha cogida
+		bolsa.bolsaFicha[fila][columna].numero = -1;
 	}
 	return ficha;
 }
 
-bool recorrerBolsa(tBolsa& bolsa, int& fila, int& columna, tFicha& ficha)
+
+bool recorrerBolsa(tBolsa& bolsa, int& fila, int& columna, int numFichas)//Busca la posición donde haya una ficha en la bolsa
 {
 	bool encontrado = false;
-	while (!encontrado && fila < 8)
+	while (!encontrado && fila < 8)//Se repite mientras que no haya encontrado la ficha y mientras que no haya llegado al final del array
 	{
-		while (!encontrado && columna < NumFichas)
+		while (!encontrado && columna < numFichas)//Mientras que no haya llegado al final de la columna y no se haya encontrado la ficha
 		{
-			if (bolsa.bolsaFicha[fila][columna].color != libre)
+			if (bolsa.bolsaFicha[fila][columna].numero != -1)//Si la posición no está vacía, encuentra la ficha y el bucle se detiene
 			{
-				ficha = bolsa.bolsaFicha[fila][columna];
-				bolsa.bolsaFicha[fila][columna].color = libre;
-				bolsa.bolsaFicha[fila][columna].numero = -1;
 				encontrado = true;
 			}
-			columna++;
+			if (!encontrado)
+			{
+				columna++;//Si no la encuentra pasa a la asiguiente posición
+			}
 		}
-		columna = 0;
-		fila++;
+		if (!encontrado)
+		{
+			columna = 0;
+			fila++;
+		}
 	}
 	return encontrado;
 }
 
-void repartir(tBolsa& bolsa, tSoportes& soportes) {
-	int j = 0;
-	tFicha ficha;
-	for (int i = 0; i < NumJugadores; i++)
+void repartir(tBolsa& bolsa, tSoportes& soportes, int numFichas, int numJugadores, int iniFichas)
+{
+	int fila, columna;
+	for (int i = 0; i < numJugadores; i++)//Una vuelta por cada jugador
 	{
-		while (soportes[i].contador < IniFichas)
+		for (int j = 0; j < iniFichas; j++)//Vuelta por cada ficha del soporte
 		{
-			ficha = robar(bolsa);
-			soportes[i].ficha[soportes[i].contador] = ficha;
-			soportes[i].contador++;
+			cin >> fila;//fila
+			cin >> columna;//columna
+			obtenerFicha(bolsa, soportes, fila, columna, i, numFichas);//Roba la ficha y la pone en el soporte correspondiente
 		}
 	}
 }
 
-void ordenarPorNum(tSoporte& soporte)
+void obtenerFicha(tBolsa& bolsa, tSoportes& soportes, int fila, int columna, int turno, int numFichas)
 {
-	int  pos;
-	tFicha elemento;
-	for (int i = 0; i < MaxFichas; i++)
+	if (soportes[turno].contador < MaxFichas)
 	{
-		pos = i;
-		elemento = soporte.ficha[pos];
-		while ((pos > 0) && (elemento.numero < soporte.ficha[pos - 1].numero))
-		{
-			soporte.ficha[pos] = soporte.ficha[pos - 1];
-			pos--;
-		}
-		soporte.ficha[pos] = elemento;
+		soportes[turno].ficha[soportes[turno].contador] = robar(bolsa, fila, columna, numFichas);
+		soportes[turno].contador++;
 	}
-
+}
+void mostrarFicha(const tFicha& ficha)
+{
+	cout << toString(ficha.color) << " " << ficha.numero << "  ";
+}
+void mostrarBolsa(const tBolsa& bolsa, int numFichas)
+{
+	cout << endl << "Bolsa..." << endl;
+	for (int i = 0; i < 8; i++)
+	{
+		for (int j = 0; j < numFichas; j++)
+		{
+			if (bolsa.bolsaFicha[i][j].color == libre || bolsa.bolsaFicha[i][j].numero == -1)
+			{
+				cout << "    " << "-1" << "  ";
+			}
+			else
+			{
+				mostrarFicha(bolsa.bolsaFicha[i][j]);
+			}
+		}
+		cout << endl;
+	}
 }
 
-
-void ordenarPorColor(tSoporte& soporte)
+void mostrarSoporte(const tSoporte& soporte)
+{
+	cout << "Soporte: ";
+	for (int i = 0; i < soporte.contador; i++)
+	{
+		mostrarFicha(soporte.ficha[i]);
+	}
+	cout << endl << endl;
+}
+void mostrarJugada(const tJugada& jugada, int numFichas)
+{
+	int i = 0;
+	cout << "Jugada: ";
+	while(jugada[i].numero < numFichas && jugada[i].numero > 0)
+	{
+		mostrarFicha(jugada[i]);
+		i++;
+	}
+	cout << endl;
+}
+void mostrarTablero(const tTablero& tablero, int numFichas)
+{
+	cout << "Tablero:" << endl;
+	for (int i = 0; i < tablero.contador; i++)
+	{
+		cout << i + 1 << ": ";
+		mostrarJugada(tablero.jugada[i], numFichas);
+		cout << endl;
+	}
+}
+void mostrarIndice(int numFichasSoporte)
+{
+	cout << "       ";
+	for(int i = 0; i < numFichasSoporte;i++)
+	{
+		cout << setw(8)<< i + 1;
+	}
+	cout << endl;
+}
+string toString(tColor color)
+{
+	string nombre;
+	if (color == rojo)
+	{
+		nombre = "rojo";
+	}
+	else if (color == amarillo)
+	{
+		nombre = "amar";
+	}
+	else if (color == azul)
+	{
+		nombre = "azul";
+	}
+	else if (color == verde)
+	{
+		nombre = "verd";
+	}
+	return nombre;
+}
+void ordenarPorNum(tSoporte& soporte, int numFichas)
 {
 	int  pos;
 	tFicha elemento;
-	for (int i = 0; i < MaxFichas; i++)
+	for (int i = 1; i < soporte.contador; i++)
 	{
 		pos = i;
-		elemento = soporte.ficha[pos];
-
-		while ((pos > 0) && (elemento.color < soporte.ficha[pos - 1].color))
+		while (pos > 0 && soporte.ficha[pos].numero < soporte.ficha[pos - 1].numero)
 		{
+			elemento = soporte.ficha[pos];
 			soporte.ficha[pos] = soporte.ficha[pos - 1];
+			soporte.ficha[pos - 1] = elemento;
 			pos--;
 		}
-		soporte.ficha[pos] = elemento;
+		if (pos > 0 && soporte.ficha[pos].color < soporte.ficha[pos - 1].color && soporte.ficha[pos].numero == soporte.ficha[pos - 1].numero)
+		{
+			while (pos > 0 && soporte.ficha[pos].color < soporte.ficha[pos - 1].color && soporte.ficha[pos].numero == soporte.ficha[pos - 1].numero)
+			{
+				elemento = soporte.ficha[pos];
+				soporte.ficha[pos] = soporte.ficha[pos - 1];
+				soporte.ficha[pos - 1] = elemento;
+				pos--;
+			}
+		}
+	}
+}
+void ordenarPorColor(tSoporte& soporte, int numFichas)
+{
+	int  pos;
+	tFicha elemento;
+	for (int i = 1; i < soporte.contador; i++)
+	{
+		pos = i;
+		while (pos > 0 && soporte.ficha[pos].color < soporte.ficha[pos - 1].color)
+		{
+			elemento = soporte.ficha[pos];
+			soporte.ficha[pos] = soporte.ficha[pos - 1];
+			soporte.ficha[pos - 1] = elemento;
+			pos--;
+		}
+		if (pos > 0 && soporte.ficha[pos].numero < soporte.ficha[pos - 1].numero && soporte.ficha[pos].color == soporte.ficha[pos - 1].color)
+		{
+			while (pos > 0 && soporte.ficha[pos].numero < soporte.ficha[pos - 1].numero && soporte.ficha[pos].color == soporte.ficha[pos - 1].color)
+			{
+				elemento = soporte.ficha[pos];
+				soporte.ficha[pos] = soporte.ficha[pos - 1];
+				soporte.ficha[pos - 1] = elemento;
+				pos--;
+			}
+		}
+	}
+}
+int avanzarTurno(int numJugadores, int turno)
+{
+	if (turno == numJugadores - 1)
+	{
+		turno = 0;
+	}
+	else
+	{
+		turno++;
+	}
+	return turno;
+}
+void mostrarSeries(tSoporte& soporte, int numFichas)
+{
+	int jugada = 0;
+	tSoporte soporteAux;
+	bool escalera = true;
+	soporteAux = soporte;
+
+	ordenarPorNum(soporte, numFichas);
+
+	for (int i = 0; i < soporte.contador - 2; i++)
+	{
+		int numiguales = 1;
+		escalera = true;
+
+		while (escalera) 
+		{
+			if (soporte.ficha[i].numero == soporte.ficha[i + numiguales].numero && soporte.ficha[i].color != soporte.ficha[i + numiguales].color)
+			{
+				numiguales++;
+			}
+			else
+			{
+				if (numiguales >= 3)
+				{
+					for (int j = i; j < i + numiguales; j++)
+					{
+						cout << toString(soporte.ficha[j].color) << " " << soporte.ficha[j].numero << "  ";
+					}
+					cout << endl;
+				}
+				escalera = false;
+			}
+		}
+	}
+	soporte = soporteAux;
+}
+void mostrarEscaleras(tSoporte& soporte, int numFichas)
+{
+	tSoporte aux;
+	bool escalera = true;
+	ordenarPorColor(soporte, numFichas);
+	aux = soporte;
+
+	for (int i = 0; i < soporte.contador - 2; i++)
+	{
+		int numiguales = 1;
+		escalera = true;
+		while (escalera) 
+		{
+			if (soporte.ficha[i].color == soporte.ficha[i + numiguales].color && soporte.ficha[i].numero + numiguales == soporte.ficha[i + numiguales].numero)
+			{
+				numiguales++;
+			}
+			else
+			{
+				if (numiguales >= 3)
+				{
+					for (int j = i; j < i + numiguales; j++)
+					{
+						mostrarFicha(soporte.ficha[j]);
+					}
+					cout << endl;
+				}
+				escalera = false;
+			}
+		}
+	}
+	soporte = aux;
+}
+
+int nuevaJugada(tSoporte& soporte, tJugada& jugada, int numFichas)
+{
+	tJugada njugada;
+	int num = 1, numFichasJugada = 0, cont = 0, fichasRecorridas = 0;
+	bool serie = true, escalera = true;
+	int es = 0;
+	mostrarSoporte(soporte);
+	mostrarIndice(soporte.contador);
+
+	cout << endl << "Fichas (0 al final) : ";
+
+	while (num > 0 && num < soporte.contador + 1) 
+	{
+		cin >> num;
+		cout << " " << num;
+		njugada[numFichasJugada - 1] = soporte.ficha[num - 1];
+		numFichasJugada++;
+	}
+	numFichasJugada--;
+	cout << endl;
+	mostrarJugada(njugada, numFichas);
+	if (numFichasJugada >= 3) {
+
+		if (numFichasJugada < 5) {
+			while (fichasRecorridas < (numFichasJugada - 2) && serie)
+			{
+				if (njugada[fichasRecorridas].numero != njugada[fichasRecorridas + 1].numero)
+				{
+					serie = false;
+				}
+
+				if (njugada[fichasRecorridas].color == njugada[fichasRecorridas + 1].color && njugada[fichasRecorridas].numero == njugada[fichasRecorridas + 1].numero)
+				{
+					serie = false;
+				}
+				fichasRecorridas++;
+			}
+		}
+		else
+		{
+			serie = false;
+		}
+		fichasRecorridas = 0;
+		while (fichasRecorridas < (numFichasJugada - 2) && escalera) 
+		{
+			if ((njugada[fichasRecorridas].color != njugada[fichasRecorridas + 1].color) || (njugada[fichasRecorridas].numero + 1 != njugada[fichasRecorridas + 1].numero) /*|| (njugada[fichasRecorridas].numero != njugada[fichasRecorridas + 1].numero + 1))*/)
+			{
+				cout << endl << fichasRecorridas << "sdjfhsdfbgjdfbgdfbgsdfg";
+				escalera = false;
+			}
+			fichasRecorridas++;
+		}
+
+		if (escalera || serie) {
+
+			for (int p = 0; p < numFichasJugada; p++)
+			{
+				jugada[p] = njugada[p];
+			}
+
+			eliminarFichas(soporte, jugada);
+
+			if (serie) {
+				es = 1;
+				cout << "  Serie correcta!!";
+			}
+			else {
+				es = -1;
+				cout << "  Escalera correcta!!";
+			}
+			cout << endl;
+			// Si es = 1 es una serie, si es -1 será una escalera, mientras que 0 sera una jugada invalida;
+		}
+		else
+		{
+			es = 0;
+			cout << " - No es una jugada correcta! Prueba de nuevo..." << endl;
+		}
+		return es;
+		// Falta por eliminar los datos que se introducen a jugada si esta no es correcta.
 	}
 }
 int buscar(const tJugada& jugada, const tFicha& ficha)
@@ -209,167 +512,85 @@ int buscar(const tJugada& jugada, const tFicha& ficha)
 	}
 	return indice;
 }
-void eliminaFichas(tSoporte& soporte, const tJugada& jugada)
+void eliminarFichas(tSoporte& soporte, const tJugada& jugada)
 {
-	for (int i = 0; i < soporte.contador; i++)
-	{
-		if (buscar(jugada, soporte.ficha[i]) != -1)
-		{
-			soporte.ficha[i].color = libre;
-			soporte.ficha[i].numero = -1;
-		}
-	}
-}
-
-int nuevaJugada(tSoporte& soporte, tJugada& jugada)
-{
-	tJugada njugada;
-	int num = 0, i = 0, cont =0, j = 0;
-	bool serie = true, escalera = true;
-	int es = 0;
-	mostrar(soporte);
-
-	while (num != 0 && num < soporte.contador) {
-
-		cout << "Fichas (0 al final) :";
-		cin >> num;
-
-		njugada[i] = soporte[num-1];
-
-		i++;
-	}
-
-	if (i >= 3) {
-
-		if (i < 5) {
-			while (j < i && serie) {
-
-				if (njugada[j].numero != njugada[j + 1].numero)
-					serie = false;
-
-				if (njugada[j].color == njugada[j + 1].color && njugada[j].numero == njugada[j + 1].numero)
-					serie = false;
-			}
-			j = 0;
-		}
-		else
-			serie = false;
-
-		while (j < i && escalera) {
-
-			if (njugada[j].color != njugada[j + 1].color && njugada[j].numero + 1 != njugada[j + 1].numero)
-				escalera = false;
-
-			else if (njugada[j].color != njugada[j + 1].color && njugada[j].numero != njugada[j + 1].numero + 1)
-				escalera = false;
-
-			j++;
-
-		}
-
-		if (escalera || serie) {
-
-			for (int p = 0; p < i; p++)
-				jugada[p] = njugada[p];
-
-			eliminaFichas(soporte, jugada);
-
-			if (serie) {
-				es = -1;
-				cout << "  Serie correcta!!";
-			}
-			else {
-				es = -1;
-				cout << "  Escalera correcta!!";
-			}
-			cout << endl;
-			// Si es = 1 es una serie, si es -1 será una escalera, mientras que 0 sera una jugada invalida;
-		}
-
-		return es;
-		// Falta por eliminar los datos que se introducen a jugada si esta no es correcta.
-	}
-}
-
-void mostrarFicha(const tFicha& ficha)
-{
-	colorTexto(ficha.color);
-	cout <<
-}
-void mostrar(const tSoporte& soporte)
-{
-	cout << "Soporte :";
-
 	for (int i = 0; i < soporte.contador; i++) {
-		switch (soporte.ficha[i].color)
+
+		if (buscar(jugada, soporte.ficha[i]) != -1) 
 		{
-		default:
-			cout << soporte.ficha[i].color;
-			break;
-
-		case amarillo:
-			cout << "amar";
-			break;
-
-		case verde:
-			cout << "verd";
-			break;
-
+			for(int j = i; j < soporte.contador;j++)
+			{
+				soporte.ficha[j] = soporte.ficha[j + 1];
+			}
 		}
-		cout << " " << soporte.ficha[i].numero << endl;
-
 	}
-
-	cout << endl;
-
-
 }
-bool ponerFicha(tJugada& jugada, tFicha& ficha) {
-
-	int i = 0;
-	tColor color;
-
-	bool SoE;
-	if (jugada[i].color != jugada[i + 1].color) // utilizo i por no poner 0 y 1 
-		SoE = false;
-	else
-		SoE = true;
-
-	while (jugada[i].color == color) {
-
-
-	}
-		
-
-
-
-
-
-
-}
-void colorTexto(tColor color)
+void resuelveCaso()
 {
-	switch (color) {
-	case amarillo:
-		cout << "\033[1;40;33m";
-		break;
-	case azul:
-		cout << "\033[40;34m";
-		break;
-	case rojo:
-		cout << "\033[40;31m";
-		break;
-	case verde:
-		cout << "\033[40;32m";
-		break;
-	case blanco:
-		cout << "\033[40;37m";
-		break;
-	}
+	tBolsa bolsa;
+	tSoportes soportes;
+	tTablero tablero;
+	bool haJugado = false;
+	int numFichas, iniFichas, numJugadores, fila, columna, opcion = 0, turno,numJugada = 0;
+	cin >> numFichas;
+	cin >> iniFichas;
+	cin >> numJugadores;
+
+	inicializarBolsa(bolsa, numFichas);//Rellena la bolsa con las fichas iniciales
+	mostrarBolsa(bolsa, numFichas);//Muestra la bolsa para comprobar que se ha rellenado efectivamente
+	//Inicializa la bolsa
+
+	repartir(bolsa, soportes, numFichas, numJugadores, iniFichas);
+	//Reparte las fichas
+
+	cout << endl << "Fichas de la bolsa con todas las fichas repartidas" << endl;
+	mostrarBolsa(bolsa, numFichas);//Muestra la bolsa
+	//Muestra la bolsa después de repartir las fichas
+
+	cin >> turno;//Recoge el turno del jugador al que le toca jugar
+	cout << endl << "Turno para el jugador " << turno << " ..." << endl;
+	turno = turno - 1;
+	mostrarSoporte(soportes[turno]);//Bucle de jugadas
+	do//Mientras que el turno no sea -1 el bucle reproduce todas las jugadas
+	{
+		opcion = menu();
+		if (opcion == 0)
+		{
+			if(numJugada == 0)
+			{
+				cin >> fila;
+				cin >> columna;
+			}
+			obtenerFicha(bolsa, soportes, fila, columna, turno, numFichas);
+			mostrarSoporte(soportes[turno]);
+			turno = avanzarTurno(numJugadores, turno);
+			cout << "Turno para el jugador " << turno + 1 << " ..." << endl;
+			mostrarSoporte(soportes[turno]);
+		}
+		else if (opcion == 1)
+		{
+			ordenarPorNum(soportes[turno], numFichas);
+			mostrarSoporte(soportes[turno]);
+		}
+		else if (opcion == 2)
+		{
+			ordenarPorColor(soportes[turno], numFichas);
+			mostrarSoporte(soportes[turno]);
+		}
+		else if (opcion == 3)
+		{
+			mostrarEscaleras(soportes[turno], numFichas);
+			mostrarSeries(soportes[turno], numFichas);
+			mostrarSoporte(soportes[turno]);
+		}
+		else if (opcion == 4)
+		{
+			numJugada = nuevaJugada(soportes[turno], tablero.jugada[tablero.contador], numFichas);
+			if(numJugada == 1 || numJugada == -1)
+			{
+				tablero.contador++;
+			}
+			mostrarSoporte(soportes[turno]);
+		}
+	} while (opcion != -1);
 }
-
-
-
-
-
-
