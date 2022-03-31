@@ -64,6 +64,8 @@ void mostrarEscaleras(const tSoporte& soporte);
 void eliminarFichas(tSoporte& soporte, const tJugada jugada);
 int buscar(const tJugada& jugada, const tFicha& ficha);
 int nuevaJugada(tSoporte& soporte, tJugada& jugada);
+void hacerEscaleras(tSoporte& soporte, int numFichas);
+
 
 
 int main() {
@@ -237,6 +239,7 @@ void mostrarJugada(const tJugada& jugada, int numFichas)
 		mostrarFicha(jugada[i]);
 		i++;
 	}
+	cout << endl;
 }
 void mostrarTablero(const tTablero& tablero, int numFichas)
 {
@@ -247,14 +250,6 @@ void mostrarTablero(const tTablero& tablero, int numFichas)
 		mostrarJugada(tablero.jugada[i], numFichas);
 		cout << endl;
 	}
-}
-void comprobarSeries()
-{
-
-}
-void comprobarEscaleras()
-{
-
 }
 
 string toString(tColor color)
@@ -351,14 +346,14 @@ void mostrarSeries(tSoporte& soporte, int numFichas)
 
 	ordenarPorNum(soporte, numFichas);
 
-	for (int t = 0; t < soporte.contador - 2; t++)
+	for (int i = 0; i < soporte.contador - 2; i++)
 	{
 		int numiguales = 1;
 		escalera = true;
 
 		while (escalera) 
 		{
-			if (soporte.ficha[t].numero == soporte.ficha[t + numiguales].numero && soporte.ficha[t].color != soporte.ficha[t + numiguales].color)
+			if (soporte.ficha[i].numero == soporte.ficha[i + numiguales].numero && soporte.ficha[i].color != soporte.ficha[i + numiguales].color)
 			{
 				numiguales++;
 			}
@@ -366,7 +361,7 @@ void mostrarSeries(tSoporte& soporte, int numFichas)
 			{
 				if (numiguales >= 3)
 				{
-					for (int j = t; j < t + numiguales; j++)
+					for (int j = i; j < i + numiguales; j++)
 					{
 						cout << toString(soporte.ficha[j].color) << " " << soporte.ficha[j].numero << "  ";
 					}
@@ -396,17 +391,51 @@ void mostrarEscaleras(tSoporte& soporte, int numFichas)
 			}
 			else
 			{
+				if (numiguales >= 3)
 				{
-					if (numiguales >= 3)
+					for (int j = i; j < i + numiguales; j++)
 					{
-						for (int j = i; j < i + numiguales; j++)
-						{
-							cout << toString(soporte.ficha[j].color) << " " << soporte.ficha[j].numero << "  ";
-						}
-						cout << endl;
+						mostrarFicha(soporte.ficha[j]);
 					}
-					escalera = false;
+					cout << endl;
 				}
+				escalera = false;
+			}
+		}
+	}
+	soporte = aux;
+}
+void hacerEscaleras(tSoporte& soporte, int numFichas)
+{
+	tArrayJugadas jugadas;
+	tSoporte aux;
+	bool escalera = true;
+	int numFichasJugada = 0, numJugada = -1;
+	ordenarPorColor(soporte, numFichas);
+
+	for (int i = 0; i < soporte.contador - 2; i++)
+	{
+		int numiguales = 1;
+		escalera = true;
+		while (escalera)
+		{
+			if (soporte.ficha[i].color == soporte.ficha[i + numiguales].color && soporte.ficha[i].numero + numiguales == soporte.ficha[i + numiguales].numero)
+			{
+				numiguales++;
+			}
+			else
+			{
+
+				if (numiguales >= 3)
+				{
+					numJugada++;
+					for (int j = i; j < i + numiguales; j++)
+					{
+						jugadas[numJugada][numFichasJugada] = soporte.ficha[j];
+						numFichasJugada++;
+					}
+				}
+					escalera = false;
 			}
 		}
 	}
@@ -427,6 +456,7 @@ int nuevaJugada(tSoporte& soporte, tJugada& jugada, int numFichas)
 	} while (indFicha == 0);
 	mostrarJugada(jugada, numFichas);
 	cout << endl;
+	return 0;
 }
 int buscar(const tJugada& jugada, const tFicha& ficha)
 {
@@ -458,7 +488,7 @@ void resuelveCaso()
 {
 	tBolsa bolsa;
 	tSoportes soportes;
-	int numFichas, iniFichas, numJugadores, fila, columna, turno, opcion,numFicha;
+	int numFichas, iniFichas, numJugadores, fila, columna, turno, opcion;
 	cin >> numFichas;
 	cin >> iniFichas;
 	cin >> numJugadores;
@@ -504,7 +534,7 @@ void resuelveCaso()
 		}
 		else if (opcion == 3)
 		{
-			mostrarEscaleras(soportes[turno], numFichas);
+			hacerEscaleras(soportes[turno], numFichas);
 			mostrarSeries(soportes[turno], numFichas);
 			mostrarSoporte(soportes[turno]);
 		}
