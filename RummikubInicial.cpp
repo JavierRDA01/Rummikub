@@ -64,7 +64,8 @@ void mostrarEscaleras(const tSoporte& soporte, int numFichas);
 void eliminarFichas(tSoporte& soporte, const tJugada& jugada);
 int buscar(const tJugada& jugada, const tFicha& ficha);
 int nuevaJugada(tSoporte& soporte, tJugada& jugada);
-void hacerEscaleras(tSoporte& soporte, int numFichas);
+bool coloresRepetidos(tJugada& jugada);
+bool jugar(tTablero& tablero, tSoporte& soporte);
 
 
 
@@ -414,12 +415,31 @@ void mostrarEscaleras(tSoporte& soporte, int numFichas)//Done
 	}
 	soporte = aux;
 }
-
+bool coloresRepetidos(tJugada& jugada)
+{
+	int i = 0;
+	bool repetidos = false;
+	while (jugada[i].numero != -1)
+	{
+		i++;
+	}
+	for(int j = 0; j < i - 1; j++)
+	{
+		for(int k = j; k < i - 1; k++)
+		{
+			if(jugada[k].color == jugada[k + 1].color)
+			{
+				repetidos = true;
+			}
+		}
+	}
+	return repetidos;
+}
 int nuevaJugada(tSoporte& soporte, tJugada& jugada)
 {
 	tJugada njugada;
 	int num = 1, numFichasJugada = 0, cont = 0, fichasRecorridas = 0;
-	bool serie = false, escalera = true;
+	bool serie = true, escalera = true, colRepetidos = false;
 	int es = 0;
 	mostrarSoporte(soporte);
 	mostrarIndice(soporte.contador);
@@ -439,21 +459,21 @@ int nuevaJugada(tSoporte& soporte, tJugada& jugada)
 	}
 	cout << endl;
 	mostrarJugada(njugada);
+	colRepetidos = coloresRepetidos(njugada);
+	if(colRepetidos)
+	{
+		serie = false;
+	}
+	else
+	{
+		escalera = false;
+	}
 	if (numFichasJugada >= 3) 
 	{
-
 		if (numFichasJugada < 5) {
-			while (fichasRecorridas < (numFichasJugada - 1) && !serie)
+			while (fichasRecorridas < (numFichasJugada - 1) && serie)
 			{
-				if (njugada[fichasRecorridas].color == njugada[fichasRecorridas + 1].color && njugada[fichasRecorridas].numero == njugada[fichasRecorridas + 1].numero)
-				{
-					serie = false;
-				}
-				else if(njugada[fichasRecorridas].color == njugada[fichasRecorridas + 1].color && njugada[fichasRecorridas].numero != njugada[fichasRecorridas + 1].numero)
-				{
-					serie = false;
-				}
-				else if (njugada[fichasRecorridas].color != njugada[fichasRecorridas + 1].color && njugada[fichasRecorridas].numero != njugada[fichasRecorridas + 1].numero)
+				if (njugada[fichasRecorridas].numero != njugada[fichasRecorridas + 1].numero)
 				{
 					serie = false;
 				}
@@ -474,21 +494,18 @@ int nuevaJugada(tSoporte& soporte, tJugada& jugada)
 			fichasRecorridas++;
 		}
 
-		if (escalera || serie) {
+		if (escalera || serie) 
+		{
 
 			for (int i = 0; i < numFichasJugada;i++)
 			{
 				jugada[i] = njugada[i];
 			}
-
 			eliminarFichas(soporte, jugada);
-
 			if (serie) {
-				es = 1;
 				cout << "  Serie correcta!!";
 			}
 			else {
-				es = -1;
 				cout << "  Escalera correcta!!";
 			}
 			cout << endl;
@@ -496,12 +513,26 @@ int nuevaJugada(tSoporte& soporte, tJugada& jugada)
 		}
 		else
 		{
-			es = 0;
 			cout << " - No es una jugada correcta! Prueba de nuevo..." << endl;
+			numFichasJugada = 0;
 		}	
 		// Falta por eliminar los datos que se introducen a jugada si esta no es correcta.
 	}
-	return es;
+	return numFichasJugada;
+}
+bool jugar(tTablero& tablero, tSoporte& soporte)
+{
+	tJugada jugada;
+	int numFichasJugada;
+	bool hayJugada = false;
+	numFichasJugada = nuevaJugada(soporte, jugada);
+	if(numFichasJugada > 0 && tablero.contador < MaxJugadas)
+	{
+		tablero.jugada[tablero.contador] = jugada;
+		tablero.contador++;
+		hayJugada = true;
+	}
+	return hayJugada;
 }
 int buscar(const tJugada& jugada, const tFicha& ficha)//Done
 {
@@ -563,12 +594,13 @@ void resuelveCaso()
 		opcion = menu();
 		if (opcion == 0)
 		{
-			if(numJugada == 0)
+			if(!haJugado)
 			{
 				cin >> fila;
 				cin >> columna;
+				obtenerFicha(bolsa, soportes, fila, columna, turno, numFichas);
 			}
-			obtenerFicha(bolsa, soportes, fila, columna, turno, numFichas);
+			haJugado = false;
 			mostrarSoporte(soportes[turno]);
 			turno = avanzarTurno(numJugadores, turno);
 			cout << "Turno para el jugador " << turno + 1 << " ..." << endl;
@@ -592,11 +624,7 @@ void resuelveCaso()
 		}
 		else if (opcion == 4)
 		{
-			numJugada = nuevaJugada(soportes[turno], tablero.jugada[tablero.contador]);
-			if(numJugada == 1 || numJugada == -1)
-			{
-				tablero.contador++;
-			}
+			haJugado = jugar(tablero, soportes[turno]);
 			mostrarSoporte(soportes[turno]);
 		}
 	} while (opcion != -1);
