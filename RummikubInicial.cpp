@@ -419,7 +419,7 @@ int nuevaJugada(tSoporte& soporte, tJugada& jugada)
 {
 	tJugada njugada;
 	int num = 1, numFichasJugada = 0, cont = 0, fichasRecorridas = 0;
-	bool serie = true, escalera = true;
+	bool serie = false, escalera = true;
 	int es = 0;
 	mostrarSoporte(soporte);
 	mostrarIndice(soporte.contador);
@@ -443,14 +443,17 @@ int nuevaJugada(tSoporte& soporte, tJugada& jugada)
 	{
 
 		if (numFichasJugada < 5) {
-			while (fichasRecorridas < (numFichasJugada - 2) && serie)
+			while (fichasRecorridas < (numFichasJugada - 1) && !serie)
 			{
-				if (njugada[fichasRecorridas].numero != njugada[fichasRecorridas + 1].numero)
+				if (njugada[fichasRecorridas].color == njugada[fichasRecorridas + 1].color && njugada[fichasRecorridas].numero == njugada[fichasRecorridas + 1].numero)
 				{
 					serie = false;
 				}
-
-				if (njugada[fichasRecorridas].color == njugada[fichasRecorridas + 1].color && njugada[fichasRecorridas].numero == njugada[fichasRecorridas + 1].numero)
+				else if(njugada[fichasRecorridas].color == njugada[fichasRecorridas + 1].color && njugada[fichasRecorridas].numero != njugada[fichasRecorridas + 1].numero)
+				{
+					serie = false;
+				}
+				else if (njugada[fichasRecorridas].color != njugada[fichasRecorridas + 1].color && njugada[fichasRecorridas].numero != njugada[fichasRecorridas + 1].numero)
 				{
 					serie = false;
 				}
@@ -462,7 +465,7 @@ int nuevaJugada(tSoporte& soporte, tJugada& jugada)
 			serie = false;
 		}
 		fichasRecorridas = 0;
-		while (fichasRecorridas < (numFichasJugada - 2) && escalera) 
+		while (fichasRecorridas < (numFichasJugada - 1) && escalera) 
 		{
 			if ((njugada[fichasRecorridas].color != njugada[fichasRecorridas + 1].color) || (njugada[fichasRecorridas].numero + 1 != njugada[fichasRecorridas + 1].numero) /*|| (njugada[fichasRecorridas].numero != njugada[fichasRecorridas + 1].numero + 1))*/)
 			{
