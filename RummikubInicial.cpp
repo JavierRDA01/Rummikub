@@ -542,15 +542,31 @@ int buscar(const tJugada& jugada, const tFicha& ficha)//Done
 }
 void eliminarFichas(tSoporte& soporte, const tJugada& jugada)//Done
 {
-	for (int i = 0; i < soporte.contador; i++) {
-
+	tJugada jugadaAux;
+	int numFichasEliminadas = 0;
+	bool fichaEliminada = false;
+	for (int i = 0; i < soporte.contador; i++) 
+	{
 		if (buscar(jugada, soporte.ficha[i]) != -1)
 		{
-			for (int j = i; j < soporte.contador; j++)
+			for(int j = 0; j < numFichasEliminadas;j++)
 			{
-				soporte.ficha[j] = soporte.ficha[j + 1];
+				if(soporte.ficha[i].numero == jugadaAux[j].numero && soporte.ficha[i].color == jugadaAux[j].color)
+				{
+					fichaEliminada = true;
+				}
+			}	
+			if (!fichaEliminada)
+			{
+				jugadaAux[numFichasEliminadas] = soporte.ficha[i];
+				numFichasEliminadas++;
+				for (int j = i; j < soporte.contador; j++)
+				{
+					soporte.ficha[j] = soporte.ficha[j + 1];
+				}
+				soporte.contador--;
 			}
-			soporte.contador--;
+			fichaEliminada = false;
 		}
 	}
 }
