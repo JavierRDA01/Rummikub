@@ -597,12 +597,12 @@ bool ponerFicha(tJugada& jugada, tFicha& ficha)
 		}
 		if (ascendente)
 		{
-			if((ficha.numero + 1 == jugada[numFichas - 1].numero) && ficha.numero + 1 < NumFichas)
+			if((ficha.numero + 1 == jugada[numFichas - 1].numero) && ficha.numero < NumFichas)
 			{
 				jugada[numFichas] = ficha;
 				hayJugada == true;
 			}
-			else if((ficha.numero - 1 == jugada[0].numero) && ficha.numero - 1 > 0)
+			else if((ficha.numero - 1 == jugada[0].numero) && ficha.numero > 0)
 			{
 				for(int i = numFichas; i > 0; i--)
 				{
@@ -614,7 +614,7 @@ bool ponerFicha(tJugada& jugada, tFicha& ficha)
 		}
 		else if(descendente)
 		{
-			if ((ficha.numero + 1 == jugada[0].numero) && ficha.numero + 1 < NumFichas)
+			if ((ficha.numero + 1 == jugada[0].numero) && ficha.numero < NumFichas)
 			{
 				for (int i = numFichas; i > 0; i--)
 				{
@@ -623,7 +623,7 @@ bool ponerFicha(tJugada& jugada, tFicha& ficha)
 				jugada[0] = ficha;
 				hayJugada == true;
 			}
-			else if ((ficha.numero - 1 == jugada[numFichas - 1].numero) && ficha.numero - 1 > 0)
+			else if ((ficha.numero - 1 == jugada[numFichas - 1].numero) && ficha.numero > 0)
 			{
 				jugada[numFichas] = ficha;
 				hayJugada == true;
