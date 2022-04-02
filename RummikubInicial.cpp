@@ -580,6 +580,7 @@ bool ponerFicha(tJugada& jugada, tFicha& ficha)
 	if(paraSerie)
 	{
 		hayJugada = true;
+		jugada[numFichas] = ficha;
 	}
 	if(paraEscalera)
 	{
@@ -598,10 +599,16 @@ bool ponerFicha(tJugada& jugada, tFicha& ficha)
 		{
 			if((ficha.numero + 1 == jugada[numFichas - 1].numero) && ficha.numero + 1 < NumFichas)
 			{
+				jugada[numFichas] = ficha;
 				hayJugada == true;
 			}
 			else if((ficha.numero - 1 == jugada[0].numero) && ficha.numero - 1 > 0)
 			{
+				for(int i = numFichas; i > 0; i--)
+				{
+					jugada[i] = jugada[i - 1];
+				}
+				jugada[0] = ficha;
 				hayJugada == true;
 			}
 		}
@@ -609,10 +616,16 @@ bool ponerFicha(tJugada& jugada, tFicha& ficha)
 		{
 			if ((ficha.numero + 1 == jugada[0].numero) && ficha.numero + 1 < NumFichas)
 			{
+				for (int i = numFichas; i > 0; i--)
+				{
+					jugada[i] = jugada[i - 1];
+				}
+				jugada[0] = ficha;
 				hayJugada == true;
 			}
 			else if ((ficha.numero - 1 == jugada[numFichas - 1].numero) && ficha.numero - 1 > 0)
 			{
+				jugada[numFichas] = ficha;
 				hayJugada == true;
 			}
 		}
