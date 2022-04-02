@@ -524,31 +524,7 @@ int nuevaJugada(tSoporte& soporte, tJugada& jugada)
 	}
 	return numFichasJugada;
 }
-bool jugar(tTablero& tablero, tSoporte& soporte)
-{
-	tFicha ficha;
-	tJugada jugada;
-	int numFichasJugada, numJugadas = 0;
-	bool hayJugada = false;
-	numFichasJugada = nuevaJugada(soporte, jugada);
-	if (numFichasJugada > 1 && tablero.contador < MaxJugadas)
-	{
-		tablero.jugada[tablero.contador] = jugada;
-		tablero.contador++;
-		hayJugada = true;
-	}
-	else if(numFichasJugada == 1 && tablero.contador < MaxJugadas)
-	{
-		ficha = jugada[0];
-		while(numJugadas < tablero.contador && !hayJugada)
-		{
-			hayJugada = ponerFicha(tablero.jugada[numJugadas], ficha);
-			numJugadas++;
-		}
-	}
-	mostrarTablero(tablero);
-	return hayJugada;
-}
+
 int buscar(const tJugada& jugada, const tFicha& ficha)//Done
 {
 	bool encontrado = false;
@@ -618,11 +594,54 @@ bool ponerFicha(tJugada& jugada, tFicha& ficha)
 				descendente = false;
 			}
 		}
-		if(ascendente || descendente)
+		if (ascendente)
 		{
-			hayJugada = true;
+			if((ficha.numero + 1 == jugada[numFichas - 1].numero) && ficha.numero + 1 < NumFichas)
+			{
+				hayJugada == true;
+			}
+			else if((ficha.numero - 1 == jugada[0].numero) && ficha.numero - 1 > 0)
+			{
+				hayJugada == true;
+			}
+		}
+		else if(descendente)
+		{
+			if ((ficha.numero + 1 == jugada[0].numero) && ficha.numero + 1 < NumFichas)
+			{
+				hayJugada == true;
+			}
+			else if ((ficha.numero - 1 == jugada[numFichas - 1].numero) && ficha.numero - 1 > 0)
+			{
+				hayJugada == true;
+			}
 		}
 	}
+	return hayJugada;
+}
+bool jugar(tTablero& tablero, tSoporte& soporte)
+{
+	tFicha ficha;
+	tJugada jugada;
+	int numFichasJugada, numJugadas = 0;
+	bool hayJugada = false;
+	numFichasJugada = nuevaJugada(soporte, jugada);
+	if (numFichasJugada > 1 && tablero.contador < MaxJugadas)
+	{
+		tablero.jugada[tablero.contador] = jugada;
+		tablero.contador++;
+		hayJugada = true;
+	}
+	else if (numFichasJugada == 1 && tablero.contador < MaxJugadas)
+	{
+		ficha = jugada[0];
+		while (numJugadas < tablero.contador && !hayJugada)
+		{
+			hayJugada = ponerFicha(tablero.jugada[numJugadas], ficha);
+			numJugadas++;
+		}
+	}
+	mostrarTablero(tablero);
 	return hayJugada;
 }
 void resuelveCaso()
