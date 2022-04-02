@@ -427,7 +427,7 @@ bool coloresRepetidos(tJugada& jugada)
 	{
 		for (int k = j; k < i - 1; k++)
 		{
-			if (jugada[k].color == jugada[k + 1].color)
+			if (jugada[j].color == jugada[k + 1].color)
 			{
 				repetidos = true;
 			}
