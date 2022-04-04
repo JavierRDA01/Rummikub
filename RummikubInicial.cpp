@@ -75,12 +75,12 @@ bool ponerFicha(tJugada& jugada, tFicha& ficha);//Comprueba si es posible poner 
 void colorTexto(tColor color);
 
 
-int main() 
+int main()
 {
 	tBolsa bolsa;
 	tSoportes soportes;
 	tTablero tablero;
-	bool haJugado = false;
+	bool haJugado = false, ganador = false;
 	int opcion = 0, turno = 0, numJugada = 0;
 
 	srand(time(NULL));
@@ -126,11 +126,18 @@ int main()
 		{
 			haJugado = jugar(tablero, soportes[turno]);
 			mostrarSoporte(soportes[turno]);
+
+			if (soportes[turno].contador == 0)
+			{
+				ganador = true;
+				cout << "El Jugador "<< turno+1 << " ha ganado!!"<< endl;
+			}
 		}
-	} while (opcion != -1);
+	} while (!ganador);
 
 	return 0;
 }
+
 
 int menu()//Muestra el menu
 {
