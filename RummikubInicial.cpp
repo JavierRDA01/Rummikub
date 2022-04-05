@@ -1,4 +1,4 @@
-// Autor/a: Nombre y apellidos
+// Autor/a: 
 #include <iostream>
 #include <stdlib.h>
 #include <string>
@@ -130,10 +130,10 @@ int main()
 			if (soportes[turno].contador == 0)
 			{
 				ganador = true;
-				cout << "El Jugador "<< turno+1 << " ha ganado!!"<< endl;
+				cout << "El Jugador " << turno + 1 << " ha ganado!!" << endl;
 			}
 		}
-	} while (!ganador);
+	} while (!ganador && (opcion >= 0 && opcion <= 4));
 
 	return 0;
 }
@@ -409,8 +409,9 @@ void mostrarSeries(tSoporte& soporte)//Done
 {
 	tSoporte soporteAux;
 	tJugada jugada;
+	tFicha elemento;
 	bool escalera = true, colorRepetido;
-	int fichasJugada = 0;
+	int fichasJugada = 0, pos;
 	soporteAux = soporte;
 
 	ordenarPorNum(soporte);
@@ -436,31 +437,53 @@ void mostrarSeries(tSoporte& soporte)//Done
 						fichasJugada++;
 					}
 					colorRepetido = coloresRepetidos(jugada);
-					if(colorRepetido)
+					if (colorRepetido)
 					{
-						for(int j = 0; j < fichasJugada; j++)//Selecciona una a una las fichas del array
+						for (int j = 0; j < fichasJugada - 1; j++)//Selecciona una a una las fichas del array
 						{
-							for(int k = j + 1; k < fichasJugada - 1;k++)//Compara el color de la ficha seleccionada con todos los de las demás fichas de posiciones superiores
+							for (int k = j + 1; k < fichasJugada; k++)//Compara el color de la ficha seleccionada con todos los de las demás fichas de posiciones superiores
 							{
-								if(jugada[j].color == jugada[k].color)//Si los colores son iguales
+								if (jugada[j].color == jugada[k].color)//Si los colores son iguales
 								{
-									for(int t = k ; t < fichasJugada - 1; t++)//Desplaza todas las fichas a la derecha eliminando asi la ficha con el mismo color de la jugada
-									{
-										jugada[t] = jugada[t + 1];
-										fichasJugada--;
-									}
+									jugada[k].color = libre;
+									jugada[k].numero = -1;
 								}
 							}
 						}
+						for (int j = 0; j < fichasJugada; j++)
+						{
+							pos = j;
+							while (pos > 0 && soporte.ficha[pos].color < soporte.ficha[pos - 1].color)
+							{
+								elemento = soporte.ficha[pos];
+								soporte.ficha[pos] = soporte.ficha[pos - 1];
+								soporte.ficha[pos - 1] = elemento;
+								pos--;
+							}
+						}
+						fichasJugada = 0;
+						while (jugada[fichasJugada].numero != -1)
+						{
+							if(jugada[fichasJugada].numero != -1)
+							{
+								fichasJugada++;
+							}
+						}
 					}
-					if((fichasJugada >= 3 && colorRepetido) || !colorRepetido)
+					if ((fichasJugada >= 3 && colorRepetido) || !colorRepetido)
 					{
-						for(int j = 0; j < fichasJugada; j++)
+						for (int j = 0; j < fichasJugada; j++)
 						{
 							mostrarFicha(jugada[j]);
 						}
+						for(int j = 0; j < fichasJugada; j++)
+						{
+							jugada[j].color = libre;
+							jugada[j].numero = -1;
+						}
 					}
-
+					fichasJugada = 0;
+					
 					colorRepetido = false;
 					cout << endl;
 				}
@@ -743,7 +766,7 @@ bool jugar(tTablero& tablero, tSoporte& soporte)
 	numFichasJugada = nuevaJugada(soporte, jugada);
 	if (numFichasJugada > 1 && tablero.contador < MaxJugadas)
 	{
-		while(jugada[posicionFichaJugada].numero != 0)
+		while (jugada[posicionFichaJugada].numero != 0)
 		{
 			tablero.jugada[tablero.contador][posicionFichaJugada] = jugada[posicionFichaJugada];
 			posicionFichaJugada++;
