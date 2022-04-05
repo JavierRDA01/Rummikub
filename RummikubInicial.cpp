@@ -755,7 +755,7 @@ bool ponerFicha(tJugada& jugada, tFicha& ficha)
 		}
 		else if (descendente)
 		{
-			if ((ficha.numero + 1 == jugada[0].numero) && ficha.numero < NumFichas)
+			if ((ficha.numero == jugada[0].numero + 1) && ficha.numero < NumFichas)
 			{
 				for (int i = numFichas; i > 0; i--)
 				{
