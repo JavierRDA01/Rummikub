@@ -144,7 +144,6 @@ int menu()//Muestra el menu
 	int opcion;
 	cout << "1: Ordenar por num., 2: Ordenar por color, 3: Sugerir, 4: Poner, 0: Fin >>> ";
 	cin >> opcion;//El jugador elige la accion que quiere llevar a cabo de entre las 4 que ofrece el menu
-	cout << opcion << endl;
 	return opcion;
 }
 
@@ -284,7 +283,6 @@ void mostrarSoporte(const tSoporte& soporte)
 void mostrarJugada(const tJugada& jugada)
 {
 	int i = 0;
-	cout << "Jugada: ";
 	while (jugada[i].numero != -1)//Mientras que no llegue al final de la jugada
 	{
 		mostrarFicha(jugada[i]);//Muestra la ficha recorrida
@@ -481,11 +479,10 @@ void mostrarSeries(tSoporte& soporte)//Done
 							jugada[j].color = libre;
 							jugada[j].numero = -1;
 						}
+						cout << endl;
 					}
-					fichasJugada = 0;
-					
+					fichasJugada = 0;	
 					colorRepetido = false;
-					cout << endl;
 				}
 				escalera = false;
 			}
@@ -569,8 +566,10 @@ int nuevaJugada(tSoporte& soporte, tJugada& jugada)
 	}
 	if (numFichasJugada == 1)
 	{
+		jugada[0] = njugada[0];
 		soloUnaFicha = true;
 	}
+	cout << "Jugada: ";
 	mostrarJugada(njugada);
 	colRepetidos = coloresRepetidos(njugada);
 	if (colRepetidos)
@@ -600,12 +599,25 @@ int nuevaJugada(tSoporte& soporte, tJugada& jugada)
 		fichasRecorridas = 0;
 		while (fichasRecorridas < (numFichasJugada - 1) && escalera)
 		{
-			if ((njugada[fichasRecorridas].color != njugada[fichasRecorridas + 1].color) || (njugada[fichasRecorridas].numero + 1 != njugada[fichasRecorridas + 1].numero) /*|| (njugada[fichasRecorridas].numero != njugada[fichasRecorridas + 1].numero + 1))*/)
+			if ((njugada[fichasRecorridas].color != njugada[fichasRecorridas + 1].color) || (njugada[fichasRecorridas].numero + 1 != njugada[fichasRecorridas + 1].numero))
 			{
 				escalera = false;
 			}
 			fichasRecorridas++;
 		}
+		if(!escalera)
+		{
+			escalera = true;
+			while (fichasRecorridas < (numFichasJugada - 1) && escalera)
+			{
+				if ((njugada[fichasRecorridas].color != njugada[fichasRecorridas + 1].color) || (njugada[fichasRecorridas].numero != njugada[fichasRecorridas + 1].numero + 1))
+				{
+					escalera = false;
+				}
+				fichasRecorridas++;
+			}
+		}
+
 
 		if (escalera || serie)
 		{
@@ -637,46 +649,50 @@ int nuevaJugada(tSoporte& soporte, tJugada& jugada)
 int buscar(const tJugada& jugada, const tFicha& ficha)//Done
 {
 	bool encontrado = false;
-	int vueltas = 0, indice = -1;
-	while (!encontrado && vueltas < NumFichas + 1)
+	int  i = 0, indice = -1;
+	while (!encontrado && i < NumFichas + 1)
 	{
-		if (jugada[vueltas].color == ficha.color && jugada[vueltas].numero == ficha.numero)
+		if (jugada[i].color == ficha.color && jugada[i].numero == ficha.numero)
 		{
-			indice = vueltas;
+			indice = i;
 			encontrado = true;
 		}
-		vueltas++;
+		else
+			i++;
 	}
 	return indice;
 }
+
 void eliminarFichas(tSoporte& soporte, const tJugada& jugada)//Done
 {
 	tJugada jugadaAux;
-	int numFichasEliminadas = 0;
-	bool fichaEliminada = false;
+	int numFichasEliminadas = 0, ind, num;
+	bool fichaEliminada;
 	for (int i = 0; i < soporte.contador; i++)
 	{
-		if (buscar(jugada, soporte.ficha[i]) != -1)
-		{
-			for (int j = 0; j < numFichasEliminadas; j++)
-			{
-				if (soporte.ficha[i].numero == jugadaAux[j].numero && soporte.ficha[i].color == jugadaAux[j].color)
-				{
-					fichaEliminada = true;
-				}
-			}
-			if (!fichaEliminada)
-			{
-				jugadaAux[numFichasEliminadas] = soporte.ficha[i];
-				numFichasEliminadas++;
-				for (int j = i; j < soporte.contador; j++)
-				{
-					soporte.ficha[j] = soporte.ficha[j + 1];
-				}
-				soporte.contador--;
-			}
-			fichaEliminada = false;
+		ind = buscar(jugada, soporte.ficha[i]);
+		fichaEliminada = false;
+		num = 0;
+
+		while (fichaEliminada && num < numFichasEliminadas && ind != -1) {
+			if (soporte.ficha[i].numero == jugadaAux[num].numero && soporte.ficha[i].color == jugadaAux[num].color)
+				fichaEliminada = true;
+			num++;
 		}
+
+
+		if (!fichaEliminada && ind != -1)
+		{
+			jugadaAux[numFichasEliminadas] = soporte.ficha[i];
+			numFichasEliminadas++;
+			for (int j = i; j < soporte.contador - 1; j++)
+			{
+				soporte.ficha[j] = soporte.ficha[j + 1];
+			}
+			soporte.contador--;
+		}
+
+
 	}
 }
 bool ponerFicha(tJugada& jugada, tFicha& ficha)
@@ -722,12 +738,12 @@ bool ponerFicha(tJugada& jugada, tFicha& ficha)
 		}
 		if (ascendente)
 		{
-			if ((ficha.numero + 1 == jugada[numFichas - 1].numero) && ficha.numero < NumFichas)
+			if ((ficha.numero == jugada[numFichas - 1].numero + 1) && ficha.numero < NumFichas)
 			{
 				jugada[numFichas] = ficha;
 				hayJugada = true;
 			}
-			else if ((ficha.numero - 1 == jugada[0].numero) && ficha.numero > 0)
+			else if ((ficha.numero == jugada[0].numero - 1) && ficha.numero > 0)
 			{
 				for (int i = numFichas; i > 0; i--)
 				{
@@ -755,14 +771,25 @@ bool ponerFicha(tJugada& jugada, tFicha& ficha)
 			}
 		}
 	}
+	if(numFichas == 0)
+	{
+		hayJugada = false;
+	}
 	return hayJugada;
 }
 bool jugar(tTablero& tablero, tSoporte& soporte)
 {
 	tFicha ficha;
 	tJugada jugada;
-	int numFichasJugada, numJugadas = 0, posicionFichaJugada = 0;
+	int numFichasJugada, numJugada = 0, posicionFichaJugada = 0, numFichaDeLaJugada = 0, i = 0;
 	bool hayJugada = false;
+	while(jugada[i].numero != -1)
+	{
+		jugada[i].numero = -1;
+		jugada[i].color = libre;
+		i++;
+	}
+	i = 0;
 	numFichasJugada = nuevaJugada(soporte, jugada);
 	if (numFichasJugada > 1 && tablero.contador < MaxJugadas)
 	{
@@ -775,14 +802,24 @@ bool jugar(tTablero& tablero, tSoporte& soporte)
 		tablero.contador++;
 		hayJugada = true;
 	}
-	else if (numFichasJugada == 1 && tablero.contador < MaxJugadas)
+	else if (numFichasJugada == 1)
 	{
 		ficha = jugada[0];
-		while (numJugadas < tablero.contador && !hayJugada)
+		cout << endl << "Jugadas del tablero donde poner la ficha: ";
+		cin >> numJugada;
+		numJugada = numJugada - 1;
+		//cout << numJugada;
+		hayJugada = ponerFicha(tablero.jugada[numJugada], ficha);
+		if (hayJugada)
 		{
-			hayJugada = ponerFicha(tablero.jugada[numJugadas], ficha);
-			numJugadas++;
+			cout << " -> Colocada!";
+			eliminarFichas(soporte, tablero.jugada[numJugada]);
 		}
+		else
+		{
+			cout << " -> Ficha incorrecta!";
+		}
+		cout << endl << endl;
 	}
 	mostrarTablero(tablero);
 	return hayJugada;
