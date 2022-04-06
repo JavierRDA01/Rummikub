@@ -60,7 +60,7 @@ void ordenarPorNum(tSoporte& soporte);//Ordena las fichas por números. Una vez 
 void obtenerFicha(tBolsa& bolsa, tSoportes& soportes, int turno);//Roba una ficha de la bolsa y la coloca en el soporte
 void mostrarSeries(tSoporte& soporte);//Muestra todas las posibles series que se pueden colocar directamentes desde un soporte
 void mostrarEscaleras(tSoporte& soporte); // Muestra todas las posibles escaleras que se pueden colocar directamentes desde un soporte
-void eliminarFichas(tSoporte& soporte, const tJugada& jugada);//Elimina una las fichas introducidas en la jugada del soporte;
+void eliminarFichas(tSoporte& soporte, const tJugada& jugada);//Elimina una ficha de un soporte
 int buscar(const tJugada& jugada, const tFicha& ficha);//Busca una ficha dentro de una jugada. Si la encuentra, devulve su índice
 int nuevaJugada(tSoporte& soporte, tJugada& jugada);//Permite hacer y comprobar si se puede hacer directamente una jugada desde el soporte
 bool coloresRepetidos(tJugada& jugada);//Comprueba si hay por lo menos dos fichas del mismo color en una jugada
@@ -452,7 +452,7 @@ void mostrarSeries(tSoporte& soporte)//Muestra todas las posibles series que se 
 void mostrarEscaleras(tSoporte& soporte)// Muestra todas las posibles escaleras que se pueden colocar directamentes desde un soporte
 {
 	tSoporte soporteAux;
-	bool escalera = true;
+	bool escalera = true, salto = false;;
 
 	soporteAux = soporte;
 	ordenarPorColor(soporte);//Primero ordena por color
@@ -461,43 +461,54 @@ void mostrarEscaleras(tSoporte& soporte)// Muestra todas las posibles escaleras 
 	{
 		int numiguales = 1;
 		escalera = true;
+		salto = false;
 		while (escalera)
 		{
-			if (soporte.ficha[i].color == soporte.ficha[i + numiguales].color && soporte.ficha[i].numero + numiguales == soporte.ficha[i + numiguales].numero)//Compara las fichas una a una hasta que no cumplen las condiciones
+			if ((soporte.ficha[i].color == soporte.ficha[i + numiguales].color && soporte.ficha[i].numero + numiguales == soporte.ficha[i + numiguales].numero) && (soporte.ficha[i + numiguales].color == soporte.ficha[i + numiguales + 1].color && soporte.ficha[i + numiguales].numero + numiguales == soporte.ficha[i + numiguales].numero))//Compara las fichas una a una hasta que no cumplen las condiciones
 			{
-				numiguales++;
+				salto = true;
 			}
-			else//Cuando no complen la condición de escalera
+			if(!salto)
 			{
-				if (numiguales >= 3)
+				if (soporte.ficha[i].color == soporte.ficha[i + numiguales].color && soporte.ficha[i].numero + numiguales == soporte.ficha[i + numiguales].numero)
 				{
-					for (int j = i; j < i + numiguales; j++)
-					{
-						mostrarFicha(soporte.ficha[j]);
-					}
-					cout << endl;
+					numiguales++;
 				}
-				escalera = false;
+				else//Cuando no complen la condición de escalera
+				{
+					if (numiguales >= 3)
+					{
+						for (int j = i; j < i + numiguales; j++)
+						{
+							mostrarFicha(soporte.ficha[j]);
+						}
+						cout << endl;
+					}
+					escalera = false;
+				}
+				salto = false;
+
 			}
+			
 		}
 	}
 	soporte = soporteAux;
 }
 bool coloresRepetidos(tJugada& jugada)//Comprueba si hay por lo menos dos fichas del mismo color en una jugada
 {
-	int i = 0;
-	bool repetidos = true;
-	while (jugada[i].numero != -1)//Cuenta el número de fichas de una jugada
+	int numFichasJugada = 0;
+	bool repetidos = false;
+	while (jugada[numFichasJugada].numero != -1)//Cuenta el número de fichas de una jugada
 	{
-		i++;
+		numFichasJugada++;
 	}
-	for (int j = 0; j < i - 1; j++)//Va comparando de una a una con todas las fichas de puestos posteriores
+	for (int i = 0; i < numFichasJugada - 1; i++)//Va comparando de una a una con todas las fichas de puestos posteriores
 	{
-		for (int k = j + 1; k < i; k++)
+		for (int j = i + 1; j < numFichasJugada;j++)
 		{
-			if (jugada[j].color != jugada[k].color)//Si hay al menos dos fichas con el mismo color es que hay repetidos
+			if (jugada[i].color == jugada[j].color)//Si hay al menos dos fichas con el mismo color es que hay repetidos
 			{
-				repetidos = false;
+				repetidos = true;
 			}
 		}
 	}
@@ -567,12 +578,11 @@ int nuevaJugada(tSoporte& soporte, tJugada& jugada)//Permite hacer y comprobar s
 		}
 		if(!escalera)//Comprueba si las escaleras son descendentes
 		{
-			escalera = true;
 			while (fichasRecorridas < (numFichasJugada - 1) && escalera)
 			{
-				if ((njugada[fichasRecorridas].color != njugada[fichasRecorridas + 1].color) || (njugada[fichasRecorridas].numero != njugada[fichasRecorridas + 1].numero + 1))
+				if ((njugada[fichasRecorridas].color == njugada[fichasRecorridas + 1].color) && (njugada[fichasRecorridas].numero == njugada[fichasRecorridas + 1].numero + 1))
 				{
-					escalera = false;
+					escalera = true;
 				}
 				fichasRecorridas++;
 			}
@@ -696,7 +706,7 @@ bool ponerFicha(tJugada& jugada, tFicha& ficha)//Comprueba si es posible poner u
 		}
 		if (ascendente)//Si es ascendente
 		{
-			if ((ficha.numero == jugada[numFichas - 1].numero + 1) && ficha.numero < NumFichas)//Comprueba el caso 1- jugada: 1 azul 2 azul 3 azul, ficha: 4 azul
+			if ((ficha.numero == jugada[numFichas - 1].numero + 1) && ficha.numero <= NumFichas)//Comprueba el caso 1- jugada: 1 azul 2 azul 3 azul, ficha: 4 azul
 			{
 				jugada[numFichas] = ficha;//Pone la ficha en última posición
 				hayJugada = true;
@@ -713,7 +723,7 @@ bool ponerFicha(tJugada& jugada, tFicha& ficha)//Comprueba si es posible poner u
 		}
 		else if (descendente)//Si es descendente
 		{
-			if ((ficha.numero == jugada[0].numero + 1) && ficha.numero < NumFichas)//Comprueba el caso 3- jugada: 5 azul 4 azul 3 azul, ficha: 6 azul
+			if ((ficha.numero == jugada[0].numero + 1) && ficha.numero <= NumFichas)//Comprueba el caso 3- jugada: 5 azul 4 azul 3 azul, ficha: 6 azul
 			{
 				for (int i = numFichas; i > 0; i--)//Si lo cumple introduce la ficha moviendo todas un espacio a la derecha y poniendo la ficha en primera posición
 				{
