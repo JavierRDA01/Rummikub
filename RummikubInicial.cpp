@@ -634,7 +634,8 @@ void eliminarFichas(tSoporte& soporte, const tJugada& jugada)//Elimina una ficha
 		fichaEliminada = false;
 		num = 0;
 
-		while (fichaEliminada && num < numFichasEliminadas && ind != -1) {
+		while (num < numFichasEliminadas && ind != -1) 
+		{
 			if (soporte.ficha[i].numero == jugadaAux[num].numero && soporte.ficha[i].color == jugadaAux[num].color)
 				fichaEliminada = true;
 			num++;
@@ -645,15 +646,12 @@ void eliminarFichas(tSoporte& soporte, const tJugada& jugada)//Elimina una ficha
 		{
 			jugadaAux[numFichasEliminadas] = soporte.ficha[i];
 			numFichasEliminadas++;
-			for (int j = i; j < soporte.contador - 1; j++)
-			{
-				soporte.ficha[j] = soporte.ficha[j + 1];
-			}
-			soporte.contador--;
+			soporte.ficha[i].numero = -1;
+			soporte.ficha[i].color = libre;
 		}
-
-
 	}
+	ordenarPorColor(soporte);
+	soporte.contador = soporte.contador - numFichasEliminadas;
 }
 bool ponerFicha(tJugada& jugada, tFicha& ficha)//Comprueba si es posible poner una ficha en una jugada a elegir del tablero. Si es así la pone.
 {
