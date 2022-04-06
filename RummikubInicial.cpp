@@ -60,7 +60,7 @@ void ordenarPorNum(tSoporte& soporte);//Ordena las fichas por números. Una vez 
 void obtenerFicha(tBolsa& bolsa, tSoportes& soportes, int turno);//Roba una ficha de la bolsa y la coloca en el soporte
 void mostrarSeries(tSoporte& soporte);//Muestra todas las posibles series que se pueden colocar directamentes desde un soporte
 void mostrarEscaleras(tSoporte& soporte); // Muestra todas las posibles escaleras que se pueden colocar directamentes desde un soporte
-void eliminarFichas(tSoporte& soporte, const tJugada& jugada);//Elimina una ficha de un soporte
+void eliminarFichas(tSoporte& soporte, const tJugada& jugada);//Elimina una las fichas introducidas en la jugada del soporte;
 int buscar(const tJugada& jugada, const tFicha& ficha);//Busca una ficha dentro de una jugada. Si la encuentra, devulve su índice
 int nuevaJugada(tSoporte& soporte, tJugada& jugada);//Permite hacer y comprobar si se puede hacer directamente una jugada desde el soporte
 bool coloresRepetidos(tJugada& jugada);//Comprueba si hay por lo menos dos fichas del mismo color en una jugada
