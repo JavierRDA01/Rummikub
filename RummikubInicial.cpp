@@ -71,7 +71,7 @@ void mostrarTablero(const tTablero& tablero);//Muestra el tablero donde se juega
 void mostrarIndice(int numFichasSoporte);//Muestra el ínidce de las fichas que se pueden jugar del soporte
 int avanzarTurno(int turno);//Una vez termina la jugada, se pasa turno al siguiente jugador
 bool ponerFicha(tJugada& jugada, tFicha& ficha);//Comprueba si es posible poner una ficha en una jugada a elegir del tablero. Si es así la pone.
-void colorTexto(tColor color);
+void colorTexto(tColor color);//Da color a la ficha según el tipo definido tColor
 
 
 int main()
@@ -200,7 +200,7 @@ tFicha robar(tBolsa& bolsa)//Roba si se puede, una ficha de la bolsa y la añade
 }
 
 
-bool recorrerBolsa(tBolsa& bolsa, int& fila, int& columna)//Done Busca la posición donde haya una ficha en la bolsa
+bool recorrerBolsa(tBolsa& bolsa, int& fila, int& columna)// Busca la posición donde haya una ficha en la bolsa
 {
 	bool encontrado = false;
 	while (!encontrado && fila < 8)//Se repite mientras que no haya encontrado la ficha y mientras que no haya llegado al final del array
@@ -225,7 +225,7 @@ bool recorrerBolsa(tBolsa& bolsa, int& fila, int& columna)//Done Busca la posici
 	return encontrado;
 }
 
-void repartir(tBolsa& bolsa, tSoportes& soportes)//Done
+void repartir(tBolsa& bolsa, tSoportes& soportes)//Reparte las fichas iniciales a todos los jugadores
 {
 	for (int i = 0; i < NumJugadores; i++)//Una vuelta por cada jugador
 	{
@@ -236,7 +236,7 @@ void repartir(tBolsa& bolsa, tSoportes& soportes)//Done
 	}
 }
 
-void obtenerFicha(tBolsa& bolsa, tSoportes& soportes, int turno)//Done
+void obtenerFicha(tBolsa& bolsa, tSoportes& soportes, int turno)//Roba una ficha de la bolsa y la coloca en el soporte
 {
 	if (soportes[turno].contador < MaxFichas)//Si el soporte no llega a su máxima capacidad
 	{
@@ -244,13 +244,13 @@ void obtenerFicha(tBolsa& bolsa, tSoportes& soportes, int turno)//Done
 		soportes[turno].contador++;//Suma el contador en 1
 	}
 }
-void mostrarFicha(const tFicha& ficha)
+void mostrarFicha(const tFicha& ficha)// Muestra el color y el número de una ficha
 {
 	colorTexto(ficha.color);
 	cout << ficha.numero << "  ";//Muestra el color y el número de la ficha
 	colorTexto(blanco);
 }
-void mostrarBolsa(const tBolsa& bolsa)
+void mostrarBolsa(const tBolsa& bolsa)//Muestra la bolsa, enseñando las fichas que quedan y las que faltan
 {
 	cout << endl << "Bolsa..." << endl;
 	for (int i = 0; i < 8; i++)//Recorre por filas
@@ -270,7 +270,7 @@ void mostrarBolsa(const tBolsa& bolsa)
 	}
 }
 
-void mostrarSoporte(const tSoporte& soporte)
+void mostrarSoporte(const tSoporte& soporte)//Muestra el soporte de un jugador
 {
 	cout << "Soporte: ";
 	for (int i = 0; i < soporte.contador; i++)//Recorre el soporte
@@ -279,7 +279,7 @@ void mostrarSoporte(const tSoporte& soporte)
 	}
 	cout << endl;
 }
-void mostrarJugada(const tJugada& jugada)
+void mostrarJugada(const tJugada& jugada)//Muestra las fichas de una jugada
 {
 	int i = 0;
 	while (jugada[i].numero != -1)//Mientras que no llegue al final de la jugada
@@ -288,7 +288,7 @@ void mostrarJugada(const tJugada& jugada)
 		i++;//Indice de la ficha a mostrar
 	}
 }
-void mostrarTablero(const tTablero& tablero)
+void mostrarTablero(const tTablero& tablero)// Muestra el tablero donde se juega
 {
 	cout << "Tablero:";
 	if (tablero.contador == 0)
@@ -308,7 +308,7 @@ void mostrarTablero(const tTablero& tablero)
 	}
 	cout << endl;
 }
-void mostrarIndice(int numFichasSoporte)
+void mostrarIndice(int numFichasSoporte)//Muestra el ínidce de las fichas que se pueden jugar del soporte
 {
 	cout << "       ";
 	for (int i = 0; i < numFichasSoporte; i++)//Añade el indice a las fichas del soporte
@@ -317,7 +317,7 @@ void mostrarIndice(int numFichasSoporte)
 	}
 	cout << endl;
 }
-void ordenarPorNum(tSoporte& soporte)//Done
+void ordenarPorNum(tSoporte& soporte)//Ordena las fichas por números. Una vez ordenadas, ordena las fichas del mismo número por color.
 {
 	int  pos;
 	tFicha elemento;
@@ -343,7 +343,7 @@ void ordenarPorNum(tSoporte& soporte)//Done
 		}
 	}
 }
-void ordenarPorColor(tSoporte& soporte)//Done
+void ordenarPorColor(tSoporte& soporte)//Ordena las fichas por color. Una vez ordenadas, ordena las fichas del mismo color por números
 {
 	int  pos;
 	tFicha elemento;
@@ -369,7 +369,7 @@ void ordenarPorColor(tSoporte& soporte)//Done
 		}
 	}
 }
-int avanzarTurno(int turno)
+int avanzarTurno(int turno)//Una vez termina la jugada, se pasa turno al siguiente jugador
 {
 	if (turno == NumJugadores - 1)//Vuelve al primer jugador si el turno era del útlimo jugador
 	{
@@ -381,7 +381,7 @@ int avanzarTurno(int turno)
 	}
 	return turno;
 }
-void mostrarSeries(tSoporte& soporte)//Done
+void mostrarSeries(tSoporte& soporte)//Muestra todas las posibles series que se pueden colocar directamentes desde un soporte
 {
 	tSoporte soporteAux;
 	tJugada jugada;
@@ -449,7 +449,7 @@ void mostrarSeries(tSoporte& soporte)//Done
 	}
 	soporte = soporteAux;//Devuelve el orden inicial al soporte
 }
-void mostrarEscaleras(tSoporte& soporte)//Done
+void mostrarEscaleras(tSoporte& soporte)// Muestra todas las posibles escaleras que se pueden colocar directamentes desde un soporte
 {
 	tSoporte soporteAux;
 	bool escalera = true;
@@ -483,7 +483,7 @@ void mostrarEscaleras(tSoporte& soporte)//Done
 	}
 	soporte = soporteAux;
 }
-bool coloresRepetidos(tJugada& jugada)
+bool coloresRepetidos(tJugada& jugada)//Comprueba si hay por lo menos dos fichas del mismo color en una jugada
 {
 	int i = 0;
 	bool repetidos = false;
@@ -503,7 +503,7 @@ bool coloresRepetidos(tJugada& jugada)
 	}
 	return repetidos;
 }
-int nuevaJugada(tSoporte& soporte, tJugada& jugada)
+int nuevaJugada(tSoporte& soporte, tJugada& jugada)//Permite hacer y comprobar si se puede hacer directamente una jugada desde el soporte
 {
 	tJugada njugada;
 	int num = 1, numFichasJugada = 0, cont = 0, fichasRecorridas = 0;
@@ -606,7 +606,7 @@ int nuevaJugada(tSoporte& soporte, tJugada& jugada)
 	return numFichasJugada;
 }
 
-int buscar(const tJugada& jugada, const tFicha& ficha)//Done
+int buscar(const tJugada& jugada, const tFicha& ficha)//Busca una ficha dentro de una jugada. Si la encuentra, devulve su índice
 {
 	bool encontrado = false;
 	int  i = 0, indice = -1;
@@ -623,7 +623,7 @@ int buscar(const tJugada& jugada, const tFicha& ficha)//Done
 	return indice;
 }
 
-void eliminarFichas(tSoporte& soporte, const tJugada& jugada)//Done
+void eliminarFichas(tSoporte& soporte, const tJugada& jugada)//Elimina una ficha de un soporte
 {
 	tJugada jugadaAux;
 	int numFichasEliminadas = 0, ind, num;
@@ -655,7 +655,7 @@ void eliminarFichas(tSoporte& soporte, const tJugada& jugada)//Done
 
 	}
 }
-bool ponerFicha(tJugada& jugada, tFicha& ficha)
+bool ponerFicha(tJugada& jugada, tFicha& ficha)//Comprueba si es posible poner una ficha en una jugada a elegir del tablero. Si es así la pone.
 {
 
 	int numFichas = 0;
@@ -737,7 +737,7 @@ bool ponerFicha(tJugada& jugada, tFicha& ficha)
 	}
 	return hayJugada;
 }
-bool jugar(tTablero& tablero, tSoporte& soporte)
+bool jugar(tTablero& tablero, tSoporte& soporte)//Llama a ponerFicha() o a nuevaJugada() dependiendo del número de fichas que queramos jugar
 {
 	tFicha ficha;
 	tJugada jugada;
@@ -782,7 +782,7 @@ bool jugar(tTablero& tablero, tSoporte& soporte)
 	mostrarTablero(tablero);
 	return hayJugada;
 }
-void colorTexto(tColor color)
+void colorTexto(tColor color)//Da color a la ficha según el tipo definido tColor
 {
 	switch (color) {
 	case amarillo:
