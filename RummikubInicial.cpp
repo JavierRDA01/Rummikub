@@ -486,18 +486,18 @@ void mostrarEscaleras(tSoporte& soporte)// Muestra todas las posibles escaleras 
 bool coloresRepetidos(tJugada& jugada)//Comprueba si hay por lo menos dos fichas del mismo color en una jugada
 {
 	int i = 0;
-	bool repetidos = false;
+	bool repetidos = true;
 	while (jugada[i].numero != -1)//Cuenta el número de fichas de una jugada
 	{
 		i++;
 	}
 	for (int j = 0; j < i - 1; j++)//Va comparando de una a una con todas las fichas de puestos posteriores
 	{
-		for (int k = j; k < i - 1; k++)
+		for (int k = j + 1; k < i; k++)
 		{
-			if (jugada[j].color == jugada[k + 1].color)//Si hay al menos dos fichas con el mismo color es que hay repetidos
+			if (jugada[j].color != jugada[k].color)//Si hay al menos dos fichas con el mismo color es que hay repetidos
 			{
-				repetidos = true;
+				repetidos = false;
 			}
 		}
 	}
