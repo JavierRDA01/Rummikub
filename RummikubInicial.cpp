@@ -169,16 +169,35 @@ void inicializarBolsa(tBolsa& bolsa)//Inicializa la bolsa poniendo todas las fic
 tFicha robar(tBolsa& bolsa)//Roba si se puede, una ficha de la bolsa y la añade al soporte. Elimina la ficha de la bolsa
 {
 	bool encontrado = false;
-	int fila, columna;
+	int iniFila, iniColumna, fila, columna;
 	tFicha ficha;
 	ficha.color = libre;//Inicializamos la ficha
 	ficha.numero = -1;//Inicializamos la ficha
-	fila = rand() % 8;
-	columna = rand() % NumFichas;
+	iniFila = rand() % 8;
+	iniColumna = rand() % NumFichas;
+	fila = iniFila;
+	columna = iniColumna;
 	if (bolsa.bolsaFicha[fila][columna].numero == -1) //Si la ficha de la posición introducida está libre, entonces busca la siguiente icha a partir de esa posición
 	{
-		encontrado = recorrerBolsa(bolsa, fila, columna);//Busca la ficha
-
+		while (!encontrado && fila < 8)//Se repite mientras que no haya encontrado la ficha y mientras que no haya llegado al final del array
+		{
+			while (!encontrado && columna < NumFichas)//Mientras que no haya llegado al final de la columna y no se haya encontrado la ficha
+			{
+				if (bolsa.bolsaFicha[fila][columna].numero != -1)//Si la posición no está vacía, encuentra la ficha y el bucle se detiene
+				{
+					encontrado = true;
+				}
+				if (!encontrado)
+				{
+					columna++;//Si no la encuentra pasa a la asiguiente posición
+				}
+			}
+			if (!encontrado)//Vuelta del bucle
+			{
+				columna = 0;
+				fila++;
+			}
+		}
 	}
 	else
 	{
@@ -188,7 +207,25 @@ tFicha robar(tBolsa& bolsa)//Roba si se puede, una ficha de la bolsa y la añade
 	{
 		fila = 0;
 		columna = 0;
-		encontrado = recorrerBolsa(bolsa, fila, columna);//Busca la ficha
+		while (!encontrado && fila < iniFila)//Se repite mientras que no haya encontrado la ficha y mientras que no haya llegado al final del array
+		{
+			while (!encontrado && columna < iniColumna)//Mientras que no haya llegado al final de la columna y no se haya encontrado la ficha
+			{
+				if (bolsa.bolsaFicha[fila][columna].numero != -1)//Si la posición no está vacía, encuentra la ficha y el bucle se detiene
+				{
+					encontrado = true;
+				}
+				if (!encontrado)
+				{
+					columna++;//Si no la encuentra pasa a la asiguiente posición
+				}
+			}
+			if (!encontrado)//Vuelta del bucle
+			{
+				columna = 0;
+				fila++;
+			}
+		}
 	}
 	if (encontrado)
 	{
@@ -197,32 +234,6 @@ tFicha robar(tBolsa& bolsa)//Roba si se puede, una ficha de la bolsa y la añade
 		bolsa.bolsaFicha[fila][columna].numero = -1;
 	}
 	return ficha;
-}
-
-
-bool recorrerBolsa(tBolsa& bolsa, int& fila, int& columna)// Busca la posición donde haya una ficha en la bolsa
-{
-	bool encontrado = false;
-	while (!encontrado && fila < 8)//Se repite mientras que no haya encontrado la ficha y mientras que no haya llegado al final del array
-	{
-		while (!encontrado && columna < NumFichas)//Mientras que no haya llegado al final de la columna y no se haya encontrado la ficha
-		{
-			if (bolsa.bolsaFicha[fila][columna].numero != -1)//Si la posición no está vacía, encuentra la ficha y el bucle se detiene
-			{
-				encontrado = true;
-			}
-			if (!encontrado)
-			{
-				columna++;//Si no la encuentra pasa a la asiguiente posición
-			}
-		}
-		if (!encontrado)//Vuelta del bucle
-		{
-			columna = 0;
-			fila++;
-		}
-	}
-	return encontrado;
 }
 
 void repartir(tBolsa& bolsa, tSoportes& soportes)//Reparte las fichas iniciales a todos los jugadores
@@ -433,14 +444,14 @@ void mostrarSeries(tSoporte& soporte)//Muestra todas las posibles series que se 
 						{
 							mostrarFicha(jugada[j]);
 						}
-						for(int j = 0; j < fichasJugada; j++)//Vacía las fichas de la jugada
+						for (int j = 0; j < fichasJugada; j++)//Vacía las fichas de la jugada
 						{
 							jugada[j].color = libre;
 							jugada[j].numero = -1;
 						}
 						cout << endl;
 					}
-					fichasJugada = 0;	
+					fichasJugada = 0;
 					colorRepetido = false;
 				}
 				escalera = false;
@@ -468,7 +479,7 @@ void mostrarEscaleras(tSoporte& soporte)// Muestra todas las posibles escaleras 
 			{
 				salto = true;
 			}
-			if(!salto)
+			if (!salto)
 			{
 				if (soporte.ficha[i].color == soporte.ficha[i + numiguales].color && soporte.ficha[i].numero + numiguales == soporte.ficha[i + numiguales].numero)
 				{
@@ -489,7 +500,7 @@ void mostrarEscaleras(tSoporte& soporte)// Muestra todas las posibles escaleras 
 				salto = false;
 
 			}
-			
+
 		}
 	}
 	soporte = soporteAux;
@@ -504,7 +515,7 @@ bool coloresRepetidos(tJugada& jugada)//Comprueba si hay por lo menos dos fichas
 	}
 	for (int i = 0; i < numFichasJugada - 1; i++)//Va comparando de una a una con todas las fichas de puestos posteriores
 	{
-		for (int j = i + 1; j < numFichasJugada;j++)
+		for (int j = i + 1; j < numFichasJugada; j++)
 		{
 			if (jugada[i].color == jugada[j].color)//Si hay al menos dos fichas con el mismo color es que hay repetidos
 			{
@@ -576,7 +587,7 @@ int nuevaJugada(tSoporte& soporte, tJugada& jugada)//Permite hacer y comprobar s
 			}
 			fichasRecorridas++;
 		}
-		if(!escalera)//Comprueba si las escaleras son descendentes
+		if (!escalera)//Comprueba si las escaleras son descendentes
 		{
 			while (fichasRecorridas < (numFichasJugada - 1) && escalera)
 			{
@@ -644,7 +655,7 @@ void eliminarFichas(tSoporte& soporte, const tJugada& jugada)//Elimina una ficha
 		fichaEliminada = false;
 		num = 0;
 
-		while (num < numFichasEliminadas && ind != -1) 
+		while (num < numFichasEliminadas && ind != -1)
 		{
 			if (soporte.ficha[i].numero == jugadaAux[num].numero && soporte.ficha[i].color == jugadaAux[num].color)
 				fichaEliminada = true;
@@ -739,7 +750,7 @@ bool ponerFicha(tJugada& jugada, tFicha& ficha)//Comprueba si es posible poner u
 			}
 		}
 	}
-	if(numFichas == 0)//Si el número de fichas es 0 no hay jugada
+	if (numFichas == 0)//Si el número de fichas es 0 no hay jugada
 	{
 		hayJugada = false;
 	}
@@ -751,7 +762,7 @@ bool jugar(tTablero& tablero, tSoporte& soporte)//Llama a ponerFicha() o a nueva
 	tJugada jugada;
 	int numFichasJugada, numJugada = 0, posicionFichaJugada = 0, numFichaDeLaJugada = 0, i = 0;
 	bool hayJugada = false;
-	while(jugada[i].numero != -1)//Cada vez que se invoca jugar se debe inicializar la jugada
+	while (jugada[i].numero != -1)//Cada vez que se invoca jugar se debe inicializar la jugada
 	{
 		jugada[i].numero = -1;
 		jugada[i].color = libre;
@@ -759,7 +770,7 @@ bool jugar(tTablero& tablero, tSoporte& soporte)//Llama a ponerFicha() o a nueva
 	}
 	i = 0;
 	numFichasJugada = nuevaJugada(soporte, jugada);//Invoca a nueva jugada
-	if (numFichasJugada > 1 && tablero.contador < MaxJugadas)//Si el jugador ha introducido una jugada
+	if (numFichasJugada > 2 && tablero.contador < MaxJugadas)//Si el jugador ha introducido una jugada
 	{
 		while (jugada[posicionFichaJugada].numero != 0)//Pone la jugada creada en nuevaJugada en el lugar del tablero que le corresponde
 		{
@@ -769,6 +780,7 @@ bool jugar(tTablero& tablero, tSoporte& soporte)//Llama a ponerFicha() o a nueva
 		tablero.contador++;
 		hayJugada = true;
 	}
+
 	else if (numFichasJugada == 1)//Si el jugador solo ha introducido una ficha
 	{
 		ficha = jugada[0];//La ficha será igual al primer ínidice de la jugada introducida en la función nueva jugada
@@ -787,6 +799,9 @@ bool jugar(tTablero& tablero, tSoporte& soporte)//Llama a ponerFicha() o a nueva
 		}
 		cout << endl << endl;
 	}
+	else if (numFichasJugada == 2)
+		cout << "Jugada no valida" << endl;
+
 	mostrarTablero(tablero);
 	return hayJugada;
 }
