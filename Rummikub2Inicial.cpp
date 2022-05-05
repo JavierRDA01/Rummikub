@@ -75,6 +75,7 @@ int buscar(const tJugada& jugada, const tFicha& ficha);//Busca una ficha dentro 
 void eliminarFichas(tSoporte& soporte, const tJugada& jugada);//Elimina una ficha de un soporte
 bool ponerFicha(tJugada& jugada, tFicha& ficha);//Comprueba si es posible poner una ficha en una jugada a elegir del tablero. Si es así la pone.
 bool jugar(tTablero& tablero, tSoporte& soporte);//Llama a ponerFicha() o a nuevaJugada() dependiendo del número de fichas que queramos jugar
+void inicializarJugada(tJugada& jugada);
 
 
 
@@ -610,7 +611,7 @@ void mostrarIndice(int numFichasSoporte)//Muestra el ínidce de las fichas que s
 		cin >> num;
 		if (num != 0)
 		{
-			njugada[numFichasJugada] = soporte.ficha[num - 1];
+			*njugada[numFichasJugada] = soporte.ficha[num - 1];
 			numFichasJugada++;
 		}
 	}
@@ -733,7 +734,7 @@ void eliminarFichas(tSoporte& soporte, const tJugada& jugada)//Elimina una ficha
 
 		if (!fichaEliminada && ind != -1)
 		{
-			jugadaAux[numFichasEliminadas] = soporte.ficha[i];
+			*jugadaAux[numFichasEliminadas] = soporte.ficha[i];
 			numFichasEliminadas++;
 			soporte.ficha[i].numero = -1;
 			soporte.ficha[i].color = libre;
@@ -768,7 +769,7 @@ bool ponerFicha(tJugada& jugada, tFicha& ficha)//Comprueba si es posible poner u
 	if (paraSerie)//Si la ficha cumple los requisitos para una serie se pone
 	{
 		hayJugada = true;
-		jugada[numFichas] = ficha;
+		*jugada[numFichas] = ficha;
 	}
 	if (paraEscalera)//Comprueba si la ficha puede ser puesta en una escalera una vez ha cumplido el primer requisito
 	{
@@ -787,7 +788,7 @@ bool ponerFicha(tJugada& jugada, tFicha& ficha)//Comprueba si es posible poner u
 		{
 			if ((ficha.numero == jugada[numFichas - 1]->numero + 1) && ficha.numero <= NumFichas)//Comprueba el caso 1- jugada: 1 azul 2 azul 3 azul, ficha: 4 azul
 			{
-				jugada[numFichas] = ficha;//Pone la ficha en última posición
+				*jugada[numFichas] = ficha;//Pone la ficha en última posición
 				hayJugada = true;
 			}
 			else if ((ficha.numero + 1 == jugada[0]->numero) && ficha.numero > 0)//Comprueba el caso 2- jugada: 2 azul 3 azul 4 azul, ficha: 1 azul
@@ -796,7 +797,7 @@ bool ponerFicha(tJugada& jugada, tFicha& ficha)//Comprueba si es posible poner u
 				{
 					jugada[i] = jugada[i - 1];
 				}
-				jugada[0] = ficha;
+				*jugada[0] = ficha;
 				hayJugada = true;
 			}
 		}
@@ -808,12 +809,12 @@ bool ponerFicha(tJugada& jugada, tFicha& ficha)//Comprueba si es posible poner u
 				{
 					jugada[i] = jugada[i - 1];
 				}
-				jugada[0] = ficha;
+				*jugada[0] = ficha;
 				hayJugada = true;
 			}
 			else if ((ficha.numero + 1 == jugada[numFichas - 1]->numero) && ficha.numero > 0)//Comprueba el caso 4- jugada: 5 azul 4 azul 3 azul, ficha: 2 azul
 			{
-				jugada[numFichas] = ficha;//Pone la ficha en última posición
+				*jugada[numFichas] = ficha;//Pone la ficha en última posición
 				hayJugada = true;
 			}
 		}
@@ -844,7 +845,7 @@ bool jugar(tTablero& tablero, tSoporte& soporte)//Llama a ponerFicha() o a nueva
 	}
 	else if (numFichasJugada == 1)//Si el jugador solo ha introducido una ficha
 	{
-		ficha = jugada[0];//La ficha será igual al primer ínidice de la jugada introducida en la función nueva jugada
+		ficha = *jugada[0];//La ficha será igual al primer ínidice de la jugada introducida en la función nueva jugada
 		cout << endl << "Jugadas del tablero donde poner la ficha: ";
 		cin >> numJugada;//Introduce la jugada donde quiere poner la ficha
 		numJugada = numJugada - 1;
