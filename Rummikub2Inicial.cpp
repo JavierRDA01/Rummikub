@@ -42,12 +42,12 @@ struct tBolsa
 typedef tSoporte tSoportes[NumJugadores];
 
 
-typedef tFicha tJugada[NumFichas + 1];
-typedef tJugada* tArrayJugadas[MaxJugadas];
+typedef ptrFicha tJugada[NumFichas + 1];
+typedef tJugada* ptrJugada;
 
 struct tTablero
 {
-	tArrayJugadas jugada;
+	ptrJugada jugada;
 	int contador = 0;
 };
 
@@ -189,18 +189,19 @@ void inicializarSoportes(tSoportes& soportes)
 }
 void inicializarTablero(tTablero& tablero)
 {
-	for(int i = 0; i < MaxJugadas;i++)
+	tablero.jugada = new tJugada[MaxJugadas];
+	for(int i = 0; i < NumFichas + 1;i++)
 	{
-		tablero.jugada[i] = new tJugada[NumFichas + 1];
-		tablero.jugada[i] = NULL;
+		inicializarJugada(tablero.jugada[i]);
 	}
 }
 void inicializarJugada(tJugada& jugada)
 {
-	jugada = new tFicha[NumFichas + 1];
+	tFicha auxFicha;
+	auxFicha.numero = -1;
 	for(int i = 0; i < NumFichas + 1;i++)
 	{
-
+		jugada[i] = new tFicha(auxFicha);
 	}
 }
 void mostrarSoporte(const tSoporte& soporte)//Muestra el soporte de un jugador
@@ -244,9 +245,9 @@ void mostrarBolsa(const tBolsa& bolsa)//Muestra la bolsa, enseñando las fichas 
 void mostrarJugada(const tJugada& jugada)//Muestra las fichas de una jugada
 {
 	int i = 0;
-	while (jugada[i].numero != -1)//Mientras que no llegue al final de la jugada
+	while (jugada[i]->numero != -1)//Mientras que no llegue al final de la jugada
 	{
-		mostrarFicha(jugada[i]);//Muestra la ficha recorrida
+		mostrarFicha(*jugada[i]);//Muestra la ficha recorrida
 		i++;//Indice de la ficha a mostrar
 	}
 }
@@ -263,7 +264,7 @@ void mostrarTablero(const tTablero& tablero)// Muestra el tablero donde se juega
 		for (int i = 0; i < tablero.contador; i++)//Recorre todas las jugadas del tablero
 		{
 			cout << i + 1 << ": ";
-			mostrarJugada(*tablero.jugada[i]);//Muestra la jugada recorrida
+			mostrarJugada(tablero.jugada[i]);//Muestra la jugada recorrida
 			cout << endl;
 
 		}
@@ -445,7 +446,7 @@ bool coloresRepetidos(tJugada& jugada)//Comprueba si hay por lo menos dos fichas
 {
 	int numFichasJugada = 0;
 	bool repetidos = false;
-	while (jugada[numFichasJugada].numero != -1)//Cuenta el número de fichas de una jugada
+	while (jugada[numFichasJugada]->numero != -1)//Cuenta el número de fichas de una jugada
 	{
 		numFichasJugada++;
 	}
@@ -453,7 +454,7 @@ bool coloresRepetidos(tJugada& jugada)//Comprueba si hay por lo menos dos fichas
 	{
 		for (int j = i + 1; j < numFichasJugada; j++)
 		{
-			if (jugada[i].color == jugada[j].color)//Si hay al menos dos fichas con el mismo color es que hay repetidos
+			if (jugada[i]->color == jugada[j]->color)//Si hay al menos dos fichas con el mismo color es que hay repetidos
 			{
 				repetidos = true;
 			}
@@ -469,7 +470,7 @@ void mostrarSeries(tSoporte& soporte)//Muestra todas las posibles series que se 
 	bool escalera = true, colorRepetido;
 	int fichasJugada = 0;
 	soporteAux = soporte;//Guarda el soporte en un auxiliar para que no se vea afectado el orden del soporte
-
+	inicializarJugada(jugada);
 	ordenarPorNum(soporte);//Primero ordena por número
 
 	for (int i = 0; i < soporte.contador - 2; i++)
@@ -489,7 +490,7 @@ void mostrarSeries(tSoporte& soporte)//Muestra todas las posibles series que se 
 				{
 					for (int j = i; j < i + numiguales; j++)
 					{
-						jugada[fichasJugada] = soporte.ficha[j];
+						*jugada[fichasJugada] = soporte.ficha[j];
 						fichasJugada++;
 					}
 					colorRepetido = coloresRepetidos(jugada);//Comprueba si hay colores repetidos
@@ -499,7 +500,7 @@ void mostrarSeries(tSoporte& soporte)//Muestra todas las posibles series que se 
 						{
 							for (int k = j + 1; k < fichasJugada; k++)//Compara el color de la ficha seleccionada con todos los de las demás fichas de posiciones superiores
 							{
-								if (jugada[j].color == jugada[k].color)//Si los colores son iguales elimina la ficha y mueve las fichas que tenía delante una posición a la izquierda
+								if (jugada[j]->color == jugada[k]->color)//Si los colores son iguales elimina la ficha y mueve las fichas que tenía delante una posición a la izquierda
 								{
 									jugada[k] = jugada[k + 1];
 									fichasJugada--;
@@ -511,12 +512,11 @@ void mostrarSeries(tSoporte& soporte)//Muestra todas las posibles series que se 
 					{
 						for (int j = 0; j < fichasJugada; j++)//Muestra la jugada
 						{
-							mostrarFicha(jugada[j]);
+							mostrarFicha(*jugada[j]);
 						}
 						for (int j = 0; j < fichasJugada; j++)//Vacía las fichas de la jugada
 						{
-							jugada[j].color = libre;
-							jugada[j].numero = -1;
+							jugada[j]->numero = -1;
 						}
 						cout << endl;
 					}
@@ -599,6 +599,7 @@ void mostrarIndice(int numFichasSoporte)//Muestra el ínidce de las fichas que s
 	int num = 1, numFichasJugada = 0, cont = 0, fichasRecorridas = 0;
 	bool serie = true, escalera = true, colRepetidos = false, soloUnaFicha = false;
 	int es = 0;
+	inicializarJugada(njugada);
 	mostrarSoporte(soporte);
 	mostrarIndice(soporte.contador);
 
@@ -635,7 +636,7 @@ void mostrarIndice(int numFichasSoporte)//Muestra el ínidce de las fichas que s
 		{
 			while (fichasRecorridas < (numFichasJugada - 1) && serie)
 			{
-				if (njugada[fichasRecorridas].numero != njugada[fichasRecorridas + 1].numero)
+				if (njugada[fichasRecorridas]->numero != njugada[fichasRecorridas + 1]->numero)
 				{
 					serie = false;
 				}
@@ -649,7 +650,7 @@ void mostrarIndice(int numFichasSoporte)//Muestra el ínidce de las fichas que s
 		fichasRecorridas = 0;
 		while (fichasRecorridas < (numFichasJugada - 1) && escalera)//Comprueba las escaleras
 		{
-			if ((njugada[fichasRecorridas].color != njugada[fichasRecorridas + 1].color) || (njugada[fichasRecorridas].numero + 1 != njugada[fichasRecorridas + 1].numero))//Si son ascendentes
+			if ((njugada[fichasRecorridas]->color != njugada[fichasRecorridas + 1]->color) || (njugada[fichasRecorridas]->numero + 1 != njugada[fichasRecorridas + 1]->numero))//Si son ascendentes
 			{
 				escalera = false;
 			}
@@ -659,7 +660,7 @@ void mostrarIndice(int numFichasSoporte)//Muestra el ínidce de las fichas que s
 		{
 			while (fichasRecorridas < (numFichasJugada - 1) && escalera)
 			{
-				if ((njugada[fichasRecorridas].color == njugada[fichasRecorridas + 1].color) && (njugada[fichasRecorridas].numero == njugada[fichasRecorridas + 1].numero + 1))
+				if ((njugada[fichasRecorridas]->color == njugada[fichasRecorridas + 1]->color) && (njugada[fichasRecorridas]->numero == njugada[fichasRecorridas + 1]->numero + 1))
 				{
 					escalera = true;
 				}
@@ -700,7 +701,7 @@ int buscar(const tJugada& jugada, const tFicha& ficha)//Busca una ficha dentro d
 	int  i = 0, indice = -1;
 	while (!encontrado && i < NumFichas + 1)
 	{
-		if (jugada[i].color == ficha.color && jugada[i].numero == ficha.numero)
+		if (jugada[i]->color == ficha.color && jugada[i]->numero == ficha.numero)
 		{
 			indice = i;
 			encontrado = true;
@@ -724,7 +725,7 @@ void eliminarFichas(tSoporte& soporte, const tJugada& jugada)//Elimina una ficha
 
 		while (num < numFichasEliminadas && ind != -1)
 		{
-			if (soporte.ficha[i].numero == jugadaAux[num].numero && soporte.ficha[i].color == jugadaAux[num].color)
+			if (soporte.ficha[i].numero == jugadaAux[num]->numero && soporte.ficha[i].color == jugadaAux[num]->color)
 				fichaEliminada = true;
 			num++;
 		}
@@ -748,14 +749,14 @@ bool ponerFicha(tJugada& jugada, tFicha& ficha)//Comprueba si es posible poner u
 	tFicha aux;
 	bool paraEscalera = true, paraSerie = true, hayJugada = false, descendente = true, ascendente = true;
 
-	while (jugada[numFichas].numero != -1)//Recorre toda la jugada y cuenta las fichas que tiene ésta
+	while (jugada[numFichas]->numero != -1)//Recorre toda la jugada y cuenta las fichas que tiene ésta
 	{
 		numFichas++;
 	}
 
 	for (int i = 0; i < numFichas; i++)//Recorre toda la jugada
 	{
-		if (ficha.color == jugada[i].color || ficha.numero != jugada[i].numero)//Si la ficha es del mismo color o no tiene el mismo número no vale para series
+		if (ficha.color == jugada[i]->color || ficha.numero != jugada[i]->numero)//Si la ficha es del mismo color o no tiene el mismo número no vale para series
 		{
 			paraSerie = false;
 		}
@@ -773,23 +774,23 @@ bool ponerFicha(tJugada& jugada, tFicha& ficha)//Comprueba si es posible poner u
 	{
 		for (int i = 0; i < numFichas - 1; i++)//Comprueba si la escalera de la jugada es ascendente o descendente
 		{
-			if (jugada[i].numero + 1 != jugada[i + 1].numero)
+			if (jugada[i]->numero + 1 != jugada[i + 1]->numero)
 			{
 				ascendente = false;
 			}
-			if (jugada[i].numero != jugada[i + 1].numero + 1)
+			if (jugada[i]->numero != jugada[i + 1]->numero + 1)
 			{
 				descendente = false;
 			}
 		}
 		if (ascendente)//Si es ascendente
 		{
-			if ((ficha.numero == jugada[numFichas - 1].numero + 1) && ficha.numero <= NumFichas)//Comprueba el caso 1- jugada: 1 azul 2 azul 3 azul, ficha: 4 azul
+			if ((ficha.numero == jugada[numFichas - 1]->numero + 1) && ficha.numero <= NumFichas)//Comprueba el caso 1- jugada: 1 azul 2 azul 3 azul, ficha: 4 azul
 			{
 				jugada[numFichas] = ficha;//Pone la ficha en última posición
 				hayJugada = true;
 			}
-			else if ((ficha.numero + 1 == jugada[0].numero) && ficha.numero > 0)//Comprueba el caso 2- jugada: 2 azul 3 azul 4 azul, ficha: 1 azul
+			else if ((ficha.numero + 1 == jugada[0]->numero) && ficha.numero > 0)//Comprueba el caso 2- jugada: 2 azul 3 azul 4 azul, ficha: 1 azul
 			{
 				for (int i = numFichas; i > 0; i--)//Si lo cumple introduce la ficha moviendo todas un espacio a la derecha y poniendo la ficha en primera posición
 				{
@@ -801,7 +802,7 @@ bool ponerFicha(tJugada& jugada, tFicha& ficha)//Comprueba si es posible poner u
 		}
 		else if (descendente)//Si es descendente
 		{
-			if ((ficha.numero == jugada[0].numero + 1) && ficha.numero <= NumFichas)//Comprueba el caso 3- jugada: 5 azul 4 azul 3 azul, ficha: 6 azul
+			if ((ficha.numero == jugada[0]->numero + 1) && ficha.numero <= NumFichas)//Comprueba el caso 3- jugada: 5 azul 4 azul 3 azul, ficha: 6 azul
 			{
 				for (int i = numFichas; i > 0; i--)//Si lo cumple introduce la ficha moviendo todas un espacio a la derecha y poniendo la ficha en primera posición
 				{
@@ -810,7 +811,7 @@ bool ponerFicha(tJugada& jugada, tFicha& ficha)//Comprueba si es posible poner u
 				jugada[0] = ficha;
 				hayJugada = true;
 			}
-			else if ((ficha.numero + 1 == jugada[numFichas - 1].numero) && ficha.numero > 0)//Comprueba el caso 4- jugada: 5 azul 4 azul 3 azul, ficha: 2 azul
+			else if ((ficha.numero + 1 == jugada[numFichas - 1]->numero) && ficha.numero > 0)//Comprueba el caso 4- jugada: 5 azul 4 azul 3 azul, ficha: 2 azul
 			{
 				jugada[numFichas] = ficha;//Pone la ficha en última posición
 				hayJugada = true;
@@ -829,17 +830,11 @@ bool jugar(tTablero& tablero, tSoporte& soporte)//Llama a ponerFicha() o a nueva
 	tJugada jugada;
 	int numFichasJugada, numJugada = 0, posicionFichaJugada = 0, numFichaDeLaJugada = 0, i = 0;
 	bool hayJugada = false;
-	while (jugada[i].numero != -1)//Cada vez que se invoca jugar se debe inicializar la jugada
-	{
-		jugada[i].numero = -1;
-		jugada[i].color = libre;
-		i++;
-	}
-	i = 0;
+	inicializarJugada(jugada);
 	numFichasJugada = nuevaJugada(soporte, jugada);//Invoca a nueva jugada
 	if (numFichasJugada > 1 && tablero.contador < MaxJugadas)//Si el jugador ha introducido una jugada
 	{
-		while (jugada[posicionFichaJugada].numero != 0)//Pone la jugada creada en nuevaJugada en el lugar del tablero que le corresponde
+		while (jugada[posicionFichaJugada]->numero != 0)//Pone la jugada creada en nuevaJugada en el lugar del tablero que le corresponde
 		{
 			tablero.jugada[tablero.contador][posicionFichaJugada] = jugada[posicionFichaJugada];
 			posicionFichaJugada++;
