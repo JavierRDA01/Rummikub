@@ -17,6 +17,7 @@ const int NumFichas = 9;
 const int IniFichas = 7;
 const int MaxFichas = 50;
 const int MaxJugadas = NumFichas * 2;
+const int iniEspaciosSoportes = 8;
 
 typedef enum { rojo, verde, azul, amarillo, blanco, libre }tColor;
 
@@ -58,7 +59,10 @@ void mostrarBolsa(const tBolsa& bolsa);//Muestra la bolsa, enseñando las fichas
 void mostrarSoporte(const tSoporte& soporte);//Muestra el soporte de un jugador
 void obtenerFicha(tBolsa& bolsa, tSoportes& soportes, int turno);//Roba una ficha de la bolsa y la coloca en el soporte
 void colorTexto(tColor color);//Da color a la ficha según el tipo definido tColor
-void mostrarFicha(tFicha* ficha);// Muestra el color y el número de una ficha
+void mostrarFicha(tFicha ficha);// Muestra el color y el número de una ficha
+void nuevaFicha(tSoporte& soporte, const tFicha ficha);
+void inicializarSoportes(tSoportes& soportes);
+
 
 
 
@@ -74,11 +78,17 @@ int main()
 
 	srand(time(NULL));
 	inicializarBolsa(bolsa);//Rellena la bolsa con las fichas iniciales
+	inicializarSoportes(soportes);
 	repartir(bolsa, soportes);
-	//Reparte las fichas
+	mostrarBolsa(bolsa);
+	for(int i = 0; i < NumJugadores;i++)
+	{
+		mostrarSoporte(soportes[i]);
+	}
+//Reparte las fichas
 
 	cout << endl << "Turno para el jugador " << turno + 1 << " ..." << endl << endl;
-	mostrarBolsa(bolsa);
+	
 	//do//Mientras que el turno no sea -1 el bucle reproduce todas las jugadas
 	//{
 	//	opcion = menu();
@@ -164,14 +174,14 @@ void mostrarSoporte(const tSoporte& soporte)//Muestra el soporte de un jugador
 	}
 	cout << endl;
 }
-void mostrarFicha(tFicha* ficha)// Muestra el color y el número de una ficha
+void mostrarFicha(tFicha ficha)// Muestra el color y el número de una ficha
 {
-	colorTexto(ficha->color);
-	if (ficha->color != blanco);
+	colorTexto(ficha.color);
+	if (ficha.color != blanco)
 	{
 		cout << " ";
 	}
-	cout << ficha->numero << "  ";//Muestra el color y el número de la ficha
+	cout << ficha.numero << "  ";//Muestra el color y el número de la ficha
 	colorTexto(blanco);
 }
 void mostrarBolsa(const tBolsa& bolsa)//Muestra la bolsa, enseñando las fichas que quedan y las que faltan
@@ -187,7 +197,7 @@ void mostrarBolsa(const tBolsa& bolsa)//Muestra la bolsa, enseñando las fichas 
 			}
 			else//Si hay ficha muestra la ficha
 			{
-				mostrarFicha(bolsa.ficha[i][j]);
+				mostrarFicha(*bolsa.ficha[i][j]);
 			}
 		}
 		cout << endl;
@@ -272,10 +282,12 @@ void repartir(tBolsa& bolsa, tSoportes& soportes)//Reparte las fichas iniciales 
 }
 void obtenerFicha(tBolsa& bolsa, tSoportes& soportes, int turno)//Roba una ficha de la bolsa y la coloca en el soporte
 {
+	tFicha *auxFicha;
+	tFicha ficha;
 	if (soportes[turno].contador < MaxFichas)//Si el soporte no llega a su máxima capacidad
 	{
-		soportes[turno].fichas[soportes[turno].contador] = robar(bolsa);//Roba la ficha y la añade a su soporte
-		soportes[turno].contador++;//Suma el contador en 1
+		auxFicha = robar(bolsa);
+		nuevaFicha(soportes[turno], *auxFicha);
 	}
 }
 int avanzarTurno(int turno)//Una vez termina la jugada, se pasa turno al siguiente jugador
@@ -291,7 +303,7 @@ int avanzarTurno(int turno)//Una vez termina la jugada, se pasa turno al siguien
 	return turno;
 }
 
-void nuevaFicha(tSoporte& soporte, tFicha ficha)
+void nuevaFicha(tSoporte& soporte, const tFicha ficha)
 {
 	tFicha *auxFichas;
 	if(soporte.contador == soporte.capacidad)
@@ -310,6 +322,7 @@ void nuevaFicha(tSoporte& soporte, tFicha ficha)
 	soporte.fichas[soporte.contador] = ficha;
 	soporte.contador++;
 }
+
 void delBolsa(tBolsa& bolsa)
 {
 	for(int i = 0; i < 8; i++)
@@ -318,6 +331,13 @@ void delBolsa(tBolsa& bolsa)
 		{
 			delete[] bolsa.ficha[i][j];
 		}
+	}
+}
+void inicializarSoportes(tSoportes& soportes)
+{
+	for(int i = 0; i < NumJugadores; i++)
+	{
+		soportes[i].fichas = new tFicha[iniEspaciosSoportes];
 	}
 }
 void colorTexto(tColor color)//Da color a la ficha según el tipo definido tColor
