@@ -26,12 +26,11 @@ struct tFicha {
 };
 
 typedef tFicha* ptrFicha;
-typedef ptrFicha tArraySoporteFichas[MaxFichas];
 
 struct tSoporte {
 	int contador = 0;
 	int capacidad = 8;
-	tArraySoporteFichas fichas;
+	ptrFicha fichas;
 };
 typedef ptrFicha tArrayBolsaFichas[8][NumFichas];
 struct tBolsa
@@ -292,29 +291,25 @@ int avanzarTurno(int turno)//Una vez termina la jugada, se pasa turno al siguien
 	return turno;
 }
 
-//void nuevaFicha(tSoporte& soporte, tFicha ficha)
-//{
-//	tArra;
-//	if(soporte.contador == soporte.capacidad)
-//	{
-//		soporte.capacidad = soporte.capacidad + 8;
-//		auxFicha = new tFicha * [soporte.capacidad];
-//		for(int i = 0; i < soporte.contador;i++)
-//		{
-//			auxFicha[i] = soporte.fichas[i];
-//		}
-//		auxFicha = soporte.fichas;
-//		for(int i = 0; i < soporte.contador; i++)
-//		{
-//			delete[] soporte.fichas[i];
-//		}
-//		delete[] soporte.fichas;
-//		soporte.fichas = auxFicha;
-//		delete[] auxFicha;
-//	}
-//	soporte.fichas[soporte.contador] = ficha;
-//	soporte.contador++;
-//}
+void nuevaFicha(tSoporte& soporte, tFicha ficha)
+{
+	tFicha *auxFichas;
+	if(soporte.contador == soporte.capacidad)
+	{
+		soporte.capacidad = soporte.capacidad + 8;
+		auxFichas = new tFicha[soporte.capacidad];
+
+		for(int i = 0; i < soporte.contador;i++)
+		{
+			auxFichas[i] = soporte.fichas[i];
+		}
+		delete[] soporte.fichas;
+
+		soporte.fichas = auxFichas;
+	}
+	soporte.fichas[soporte.contador] = ficha;
+	soporte.contador++;
+}
 void delBolsa(tBolsa& bolsa)
 {
 	for(int i = 0; i < 8; i++)
