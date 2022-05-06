@@ -31,7 +31,7 @@ typedef tFicha* ptrFicha;
 
 struct tSoporte {
 	int contador = 0;
-	int capacidad = 8;
+	int capacidad = iniEspaciosSoportes;
 	ptrFicha ficha;
 };
 typedef ptrFicha tArrayBolsaFichas[8][NumFichas];
@@ -491,7 +491,7 @@ void mostrarSeries(tSoporte& soporte)//Muestra todas las posibles series que se 
 	{
 		soporte.ficha[i] = jugadaAux[i];
 	}
-	delJugada(jugadaAux);
+	delete[] jugadaAux;
 }
 void mostrarEscaleras(tSoporte& soporte)// Muestra todas las posibles escaleras que se pueden colocar directamentes desde un soporte
 {
@@ -543,7 +543,7 @@ void mostrarEscaleras(tSoporte& soporte)// Muestra todas las posibles escaleras 
 	{
 		soporte.ficha[i] = jugadaAux[i];
 	}
-	delJugada(jugadaAux);
+	delete[] jugadaAux;
 }
 
 void mostrarIndice(int numFichasSoporte)//Muestra el ínidce de las fichas que se pueden jugar del soporte
@@ -654,7 +654,7 @@ void mostrarIndice(int numFichasSoporte)//Muestra el ínidce de las fichas que s
 		cout << endl << endl;
 		// Falta por eliminar los datos que se introducen a jugada si esta no es correcta.
 	}
-	delJugada(njugada);
+	delete[] njugada;
 	return numFichasJugada;
 }
 int buscar(const tJugada& jugada, const tFicha& ficha)//Busca una ficha dentro de una jugada. Si la encuentra, devulve su índice
@@ -677,6 +677,7 @@ int buscar(const tJugada& jugada, const tFicha& ficha)//Busca una ficha dentro d
 void eliminarFichas(tSoporte& soporte, const tJugada& jugada)//Elimina una ficha de un soporte
 {
 	tJugada jugadaAux;
+	tFicha* auxFichas = NULL;
 	inicializarJugada(jugadaAux);
 	int numFichasEliminadas = 0, ind, num;
 	bool fichaEliminada;
@@ -704,7 +705,18 @@ void eliminarFichas(tSoporte& soporte, const tJugada& jugada)//Elimina una ficha
 	}
 	ordenarPorColor(soporte);
 	soporte.contador = soporte.contador - numFichasEliminadas;
-	delJugada(jugadaAux);
+	if(soporte.contador <= soporte.capacidad - 4)
+	{
+		soporte.capacidad = soporte.capacidad - 4;
+		auxFichas = new tFicha[soporte.capacidad];
+		for(int i = 0; i < soporte.contador; i++)
+		{
+			auxFichas[i] = soporte.ficha[i];
+		}
+		delete[] soporte.ficha;
+		soporte.ficha = auxFichas;
+	}
+	delete[] jugadaAux;
 }
 bool ponerFicha(tJugada& jugada, tFicha& ficha)//Comprueba si es posible poner una ficha en una jugada a elegir del tablero. Si es así la pone.
 {
@@ -825,7 +837,7 @@ bool jugar(tTablero& tablero, tSoporte& soporte)//Llama a ponerFicha() o a nueva
 		cout << endl << endl;
 	}
 	mostrarTablero(tablero);
-	delJugada(jugada);
+	delete[] jugada;
 	return hayJugada;
 }
 void delSoportes(tSoportes& soportes)
