@@ -43,7 +43,7 @@ struct tBolsa
 };
 typedef tSoporte tSoportes[NumJugadores];
 
-typedef ptrFicha tJugada;
+typedef tFicha* tJugada;
 typedef tJugada tArrayJugada[MaxJugadas];
 
 struct tTablero
@@ -860,7 +860,6 @@ void delTablero(tTablero& tablero)
 	{
 		delete[] tablero.jugada[i];
 	}
-	delete[] tablero.jugada;
 }
 
 void inicializarTablero(tTablero& tablero)
