@@ -34,6 +34,7 @@ struct tSoporte {
 	int capacidad = iniEspaciosSoportes;
 	ptrFicha ficha;
 };
+
 typedef ptrFicha tArrayBolsaFichas[8][NumFichas];
 struct tBolsa
 {
@@ -42,13 +43,12 @@ struct tBolsa
 };
 typedef tSoporte tSoportes[NumJugadores];
 
-
 typedef ptrFicha tJugada;
-typedef tJugada* ptrJugada;
+typedef tJugada tArrayJugada[MaxJugadas];
 
 struct tTablero
 {
-	ptrJugada jugada;
+	tArrayJugada jugada;
 	int contador = 0;
 };
 
@@ -865,7 +865,6 @@ void delTablero(tTablero& tablero)
 
 void inicializarTablero(tTablero& tablero)
 {
-	tablero.jugada = new tJugada[MaxJugadas];
 	for (int i = 0; i < MaxJugadas; i++)
 	{
 		inicializarJugada(tablero.jugada[i]);
