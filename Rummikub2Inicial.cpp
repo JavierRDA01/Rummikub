@@ -76,7 +76,7 @@ int buscar(const tJugada& jugada, const tFicha& ficha);//Busca una ficha dentro 
 void eliminarFichas(tSoporte& soporte, const tJugada& jugada);//Elimina una ficha de un soporte
 bool ponerFicha(tJugada& jugada, tFicha& ficha);//Comprueba si es posible poner una ficha en una jugada a elegir del tablero. Si es así la pone.
 bool jugar(tTablero& tablero, tSoporte& soporte);//Llama a ponerFicha() o a nuevaJugada() dependiendo del número de fichas que queramos jugar
-void inicializarJugada(tJugada& jugada);
+void inicializarJugada(tJugada& jugada, int espacioJugada);
 void delBolsa(tBolsa& bolsa);
 void delSoportes(tSoportes& soportes);
 void delTablero(tTablero& tablero);
@@ -309,6 +309,9 @@ void repartir(tBolsa& bolsa, tSoportes& soportes)//Reparte las fichas iniciales 
 }
 void obtenerFicha(tBolsa& bolsa, tSoportes& soportes, int turno)//Roba una ficha de la bolsa y la coloca en el soporte
 {
+	tFicha auxFicha;
+	auxFicha.color = libre;
+	auxFicha.numero = -1;
 	if (soportes[turno].contador < MaxFichas)//Si el soporte no llega a su máxima capacidad
 	{
 		nuevaFicha(soportes[turno], robar(bolsa));
@@ -425,8 +428,8 @@ void mostrarSeries(tSoporte& soporte)//Muestra todas las posibles series que se 
 	tFicha elemento;
 	bool escalera = true, colorRepetido;
 	int fichasJugada = 0;
-	inicializarJugada(jugada);
-	inicializarJugada(jugadaAux);
+	inicializarJugada(jugada, soporte.contador);
+	inicializarJugada(jugadaAux, soporte.contador);
 	for (int i = 0; i < soporte.contador; i++)
 	{
 		jugadaAux[i] = soporte.ficha[i];
@@ -492,12 +495,13 @@ void mostrarSeries(tSoporte& soporte)//Muestra todas las posibles series que se 
 		soporte.ficha[i] = jugadaAux[i];
 	}
 	delete[] jugadaAux;
+	delete[] jugada;
 }
 void mostrarEscaleras(tSoporte& soporte)// Muestra todas las posibles escaleras que se pueden colocar directamentes desde un soporte
 {
 	tJugada jugadaAux;
 	bool escalera = true, salto = false;
-	inicializarJugada(jugadaAux);
+	inicializarJugada(jugadaAux, soporte.contador);
 	for(int i = 0; i < soporte.contador;i++)
 	{
 		jugadaAux[i] = soporte.ficha[i];
@@ -560,7 +564,7 @@ void mostrarIndice(int numFichasSoporte)//Muestra el ínidce de las fichas que s
 	int num = 1, numFichasJugada = 0, cont = 0, fichasRecorridas = 0;
 	bool serie = true, escalera = true, colRepetidos = false, soloUnaFicha = false;
 	int es = 0;
-	inicializarJugada(njugada);
+	inicializarJugada(njugada, soporte.contador);
 	mostrarSoporte(soporte);
 	mostrarIndice(soporte.contador);
 
@@ -678,7 +682,7 @@ void eliminarFichas(tSoporte& soporte, const tJugada& jugada)//Elimina una ficha
 {
 	tJugada jugadaAux;
 	tFicha* auxFichas;
-	inicializarJugada(jugadaAux);
+	inicializarJugada(jugadaAux, soporte.contador);
 	int numFichasEliminadas = 0, ind, num;
 	bool fichaEliminada;
 	for (int i = 0; i < soporte.contador; i++)
@@ -799,7 +803,7 @@ bool jugar(tTablero& tablero, tSoporte& soporte)//Llama a ponerFicha() o a nueva
 	tJugada jugada;
 	int numFichasJugada, numJugada = 0, posicionFichaJugada = 0, numFichaDeLaJugada = 0, i = 0;
 	bool hayJugada = false;
-	inicializarJugada(jugada);
+	inicializarJugada(jugada, soporte.contador);
 	numFichasJugada = nuevaJugada(soporte, jugada);//Invoca a nueva jugada
 	if (numFichasJugada > 1 && tablero.contador < MaxJugadas)//Si el jugador ha introducido una jugada
 	{
@@ -859,14 +863,14 @@ void inicializarTablero(tTablero& tablero)
 {
 	for(int i = 0; i < MaxJugadas;i++)
 	{
-		inicializarJugada(tablero.jugada[i]);
+		inicializarJugada(tablero.jugada[i], NumFichas + 1);
 	}
 }
-void inicializarJugada(tJugada& jugada) {
+void inicializarJugada(tJugada& jugada, int espacioJugada) {
 
-	jugada = new tFicha[NumFichas + 1];
+	jugada = new tFicha[espacioJugada];
 
-	for (int i = 0; i < NumFichas + 1; i++)
+	for (int i = 0; i <  espacioJugada; i++)
 	{
 		jugada[i].numero = -1;
 	}
