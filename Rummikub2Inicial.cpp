@@ -93,7 +93,6 @@ int main()
 
 
 	srand(time(NULL));
-	inicializarTablero(tablero);
 	inicializarBolsa(bolsa);//Rellena la bolsa con las fichas iniciales
 	inicializarSoportes(soportes);
 	repartir(bolsa, soportes);
@@ -802,6 +801,7 @@ bool jugar(tTablero& tablero, tSoporte& soporte)//Llama a ponerFicha() o a nueva
 	numFichasJugada = nuevaJugada(soporte, jugada);//Invoca a nueva jugada
 	if (numFichasJugada > 1 && tablero.contador < MaxJugadas)//Si el jugador ha introducido una jugada
 	{
+		inicializarTablero(tablero);
 		while (jugada[posicionFichaJugada].numero != 0)//Pone la jugada creada en nuevaJugada en el lugar del tablero que le corresponde
 		{
 			tablero.jugada[tablero.contador][posicionFichaJugada] = jugada[posicionFichaJugada];
@@ -848,7 +848,7 @@ void inicializarSoportes(tSoportes& soportes)
 }
 void delTablero(tTablero& tablero)
 {
-	for(int i = 0; i <  MaxJugadas;i++)
+	for(int i = 0; i <  tablero.contador;i++)
 	{
 		delete[] tablero.jugada[i];
 	}
@@ -856,9 +856,10 @@ void delTablero(tTablero& tablero)
 
 void inicializarTablero(tTablero& tablero)
 {
-	for (int i = 0; i < MaxJugadas; i++)
+	tablero.jugada[tablero.contador] = new tFicha[NumFichas + 1];
+	for(int i = 0; i < NumFichas + 1; i++)
 	{
-		inicializarJugada(tablero.jugada[i]);
+		tablero.jugada[0][i].numero = -1;
 	}
 }
 void inicializarJugada(tJugada& jugada) {
