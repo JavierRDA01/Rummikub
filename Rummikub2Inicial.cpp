@@ -340,11 +340,11 @@ void nuevaFicha(tSoporte& soporte, const tFicha& ficha)
 			auxFichas[i] = soporte.ficha[i];
 		}
 		delete[] soporte.ficha;
-
 		soporte.ficha = auxFichas;
 	}
 	soporte.ficha[soporte.contador] = ficha;
 	soporte.contador++;
+	auxFichas = nullptr;
 }
 void ordenarPorNum(tSoporte& soporte)//Ordena las fichas por números. Una vez ordenadas, ordena las fichas del mismo número por color.
 {
@@ -490,6 +490,7 @@ void mostrarSeries(tSoporte& soporte)//Muestra todas las posibles series que se 
 	{
 		soporte.ficha[i] = jugadaAux[i];
 	}
+	jugadaAux = nullptr;
 	delete[] jugadaAux;
 }
 void mostrarEscaleras(tSoporte& soporte)// Muestra todas las posibles escaleras que se pueden colocar directamentes desde un soporte
@@ -542,6 +543,7 @@ void mostrarEscaleras(tSoporte& soporte)// Muestra todas las posibles escaleras 
 	{
 		soporte.ficha[i] = jugadaAux[i];
 	}
+	jugadaAux = nullptr;
 	delete[] jugadaAux;
 }
 
@@ -653,6 +655,7 @@ void mostrarIndice(int numFichasSoporte)//Muestra el ínidce de las fichas que s
 		cout << endl << endl;
 		// Falta por eliminar los datos que se introducen a jugada si esta no es correcta.
 	}
+	njugada = nullptr;
 	delete[] njugada;
 	return numFichasJugada;
 }
@@ -708,7 +711,7 @@ void eliminarFichas(tSoporte& soporte, const tJugada& jugada)//Elimina una ficha
 	{
 		reducirSoporte(soporte);
 	}
-	
+	jugadaAux = nullptr;
 	delete[] jugadaAux;
 }
 bool ponerFicha(tJugada& jugada, tFicha& ficha)//Comprueba si es posible poner una ficha en una jugada a elegir del tablero. Si es así la pone.
@@ -830,6 +833,7 @@ bool jugar(tTablero& tablero, tSoporte& soporte)//Llama a ponerFicha() o a nueva
 		cout << endl << endl;
 	}
 	mostrarTablero(tablero);
+	jugada = nullptr;
 	delete[] jugada;
 	return hayJugada;
 }
