@@ -95,6 +95,7 @@ int main()
 	srand(time(NULL));
 	inicializarBolsa(bolsa);//Rellena la bolsa con las fichas iniciales
 	inicializarSoportes(soportes);
+	inicializarTablero(tablero);
 	repartir(bolsa, soportes);
 	mostrarBolsa(bolsa);
 	for (int i = 0; i < NumJugadores; i++)
@@ -340,10 +341,11 @@ void nuevaFicha(tSoporte& soporte, const tFicha& ficha)
 		}
 		delete[] soporte.ficha;
 		soporte.ficha = auxFichas;
+		auxFichas = nullptr;
 	}
 	soporte.ficha[soporte.contador] = ficha;
 	soporte.contador++;
-	auxFichas = nullptr;
+	
 }
 void ordenarPorNum(tSoporte& soporte)//Ordena las fichas por números. Una vez ordenadas, ordena las fichas del mismo número por color.
 {
@@ -703,7 +705,7 @@ void eliminarFichas(tSoporte& soporte, const tJugada& jugada)//Elimina una ficha
 	}
 	ordenarPorColor(soporte);
 	soporte.contador = soporte.contador - numFichasEliminadas;
-	if(soporte.contador <= soporte.capacidad - 4)
+	if(soporte.contador == soporte.capacidad - 8)
 	{
 		reducirSoporte(soporte);
 	}
@@ -801,7 +803,6 @@ bool jugar(tTablero& tablero, tSoporte& soporte)//Llama a ponerFicha() o a nueva
 	numFichasJugada = nuevaJugada(soporte, jugada);//Invoca a nueva jugada
 	if (numFichasJugada > 1 && tablero.contador < MaxJugadas)//Si el jugador ha introducido una jugada
 	{
-		inicializarTablero(tablero);
 		while (jugada[posicionFichaJugada].numero != 0)//Pone la jugada creada en nuevaJugada en el lugar del tablero que le corresponde
 		{
 			tablero.jugada[tablero.contador][posicionFichaJugada] = jugada[posicionFichaJugada];
@@ -848,7 +849,7 @@ void inicializarSoportes(tSoportes& soportes)
 }
 void delTablero(tTablero& tablero)
 {
-	for(int i = 0; i <  tablero.contador;i++)
+	for(int i = 0; i <  MaxJugadas;i++)
 	{
 		delete[] tablero.jugada[i];
 	}
@@ -856,10 +857,9 @@ void delTablero(tTablero& tablero)
 
 void inicializarTablero(tTablero& tablero)
 {
-	tablero.jugada[tablero.contador] = new tFicha[NumFichas + 1];
-	for(int i = 0; i < NumFichas + 1; i++)
+	for(int i = 0; i < MaxJugadas;i++)
 	{
-		tablero.jugada[0][i].numero = -1;
+		inicializarJugada(tablero.jugada[i]);
 	}
 }
 void inicializarJugada(tJugada& jugada) {
@@ -873,7 +873,6 @@ void inicializarJugada(tJugada& jugada) {
 }
 void delJugada(tJugada& jugada)
 {
-
 	delete[] jugada;
 }
 void delBolsa(tBolsa& bolsa)
