@@ -55,13 +55,13 @@ struct tTablero
 int menu();//Muestra el menu
 void inicializarBolsa(tBolsa& bolsa);//Inicializa la bolsa poniendo todas las fichas posibles segun el parámetro numFichas
 void repartir(tBolsa& bolsa, tSoportes& soportes);//Reparte las fichas iniciales a todos los jugadores
-tFicha* robar(tBolsa& bolsa);//Roba si se puede, una ficha de la bolsa y la añade al soporte. Elimina la ficha de la bolsa
+tFicha robar(tBolsa& bolsa);//Roba si se puede, una ficha de la bolsa y la añade al soporte. Elimina la ficha de la bolsa
 void mostrarBolsa(const tBolsa& bolsa);//Muestra la bolsa, enseñando las fichas que quedan y las que faltan
 void mostrarSoporte(const tSoporte& soporte);//Muestra el soporte de un jugador
 void obtenerFicha(tBolsa& bolsa, tSoportes& soportes, int turno);//Roba una ficha de la bolsa y la coloca en el soporte
 void colorTexto(tColor color);//Da color a la ficha según el tipo definido tColor
 void mostrarFicha(tFicha ficha);// Muestra el color y el número de una ficha
-void nuevaFicha(tSoporte& soporte, const tFicha ficha);
+void nuevaFicha(tSoporte& soporte, const tFicha& ficha);
 void inicializarSoportes(tSoportes& soportes);
 void ordenarPorNum(tSoporte& soporte);//Ordena las fichas por números. Una vez ordenadas, ordena las fichas del mismo número por color.
 void ordenarPorColor(tSoporte& soporte);//Ordena las fichas por color. Una vez ordenadas, ordena las fichas del mismo color por números
@@ -81,7 +81,7 @@ void delBolsa(tBolsa& bolsa);
 void delSoportes(tSoportes& soportes);
 void delTablero(tTablero& tablero);
 void delJugada(tJugada& jugada);
-
+void reducirSoporte(tSoporte& soporte);
 
 int main()
 {
@@ -154,7 +154,7 @@ int main()
 	delSoportes(soportes);
 	delTablero(tablero);
 	_CrtDumpMemoryLeaks();
-return 0;
+	return 0;
 }
 int menu()//Muestra el menu
 {
@@ -226,16 +226,15 @@ void mostrarTablero(const tTablero& tablero)// Muestra el tablero donde se juega
 			cout << i + 1 << ": ";
 			mostrarJugada(tablero.jugada[i]);//Muestra la jugada recorrida
 			cout << endl;
-
 		}
 	}
 	cout << endl;
 }
-tFicha* robar(tBolsa& bolsa)//Roba si se puede, una ficha de la bolsa y la añade al soporte. Elimina la ficha de la bolsa
+tFicha robar(tBolsa& bolsa)//Roba si se puede, una ficha de la bolsa y la añade al soporte. Elimina la ficha de la bolsa
 {
 	bool encontrado = false;
 	int iniFila, iniColumna, fila, columna;
-	tFicha* ficha = NULL;
+	tFicha ficha;
 	iniFila = rand() % 8;
 	iniColumna = rand() % NumFichas;
 	fila = iniFila;
@@ -293,8 +292,8 @@ tFicha* robar(tBolsa& bolsa)//Roba si se puede, una ficha de la bolsa y la añad
 	}
 	if (encontrado)
 	{
-		ficha = bolsa.ficha[fila][columna];//Si finalmente encuentra la ficha, coge la ficha a partir de la posición encontrada
-		bolsa.ficha[fila][columna] = NULL;
+		ficha = *bolsa.ficha[fila][columna];//Si finalmente encuentra la ficha, coge la ficha a partir de la posición encontrada
+		bolsa.ficha[fila][columna] = nullptr;
 	}
 	return ficha;
 }
@@ -312,7 +311,7 @@ void obtenerFicha(tBolsa& bolsa, tSoportes& soportes, int turno)//Roba una ficha
 {
 	if (soportes[turno].contador < MaxFichas)//Si el soporte no llega a su máxima capacidad
 	{
-		nuevaFicha(soportes[turno], *robar(bolsa));
+		nuevaFicha(soportes[turno], robar(bolsa));
 	}
 }
 int avanzarTurno(int turno)//Una vez termina la jugada, se pasa turno al siguiente jugador
@@ -328,7 +327,7 @@ int avanzarTurno(int turno)//Una vez termina la jugada, se pasa turno al siguien
 	return turno;
 }
 
-void nuevaFicha(tSoporte& soporte, const tFicha ficha)
+void nuevaFicha(tSoporte& soporte, const tFicha& ficha)
 {
 	tFicha* auxFichas;
 	if (soporte.contador == soporte.capacidad)
@@ -677,7 +676,7 @@ int buscar(const tJugada& jugada, const tFicha& ficha)//Busca una ficha dentro d
 void eliminarFichas(tSoporte& soporte, const tJugada& jugada)//Elimina una ficha de un soporte
 {
 	tJugada jugadaAux;
-	tFicha* auxFichas = NULL;
+	tFicha* auxFichas;
 	inicializarJugada(jugadaAux);
 	int numFichasEliminadas = 0, ind, num;
 	bool fichaEliminada;
@@ -707,15 +706,9 @@ void eliminarFichas(tSoporte& soporte, const tJugada& jugada)//Elimina una ficha
 	soporte.contador = soporte.contador - numFichasEliminadas;
 	if(soporte.contador <= soporte.capacidad - 4)
 	{
-		soporte.capacidad = soporte.capacidad - 4;
-		auxFichas = new tFicha[soporte.capacidad];
-		for(int i = 0; i < soporte.contador; i++)
-		{
-			auxFichas[i] = soporte.ficha[i];
-		}
-		delete[] soporte.ficha;
-		soporte.ficha = auxFichas;
+		reducirSoporte(soporte);
 	}
+	
 	delete[] jugadaAux;
 }
 bool ponerFicha(tJugada& jugada, tFicha& ficha)//Comprueba si es posible poner una ficha en una jugada a elegir del tablero. Si es así la pone.
@@ -856,7 +849,7 @@ void inicializarSoportes(tSoportes& soportes)
 }
 void delTablero(tTablero& tablero)
 {
-	for(int i = 0; i < MaxJugadas;i++)
+	for(int i = 0; i <  MaxJugadas;i++)
 	{
 		delete[] tablero.jugada[i];
 	}
@@ -880,10 +873,8 @@ void inicializarJugada(tJugada& jugada) {
 }
 void delJugada(tJugada& jugada)
 {
-	for(int i = 0; i < NumFichas + 1; i++)
-	{
-		delete[] jugada;
-	}
+
+	delete[] jugada;
 }
 void delBolsa(tBolsa& bolsa)
 {
@@ -915,6 +906,19 @@ void inicializarBolsa(tBolsa& bolsa)//Inicializa la bolsa poniendo todas las fic
 			bolsa.ficha[i][j] = new tFicha(auxFicha);
 		}
 	}
+}
+void reducirSoporte(tSoporte &soporte)
+{
+	tFicha* auxFichas = new tFicha[soporte.capacidad - 4];
+
+	for (int i = 0; i < soporte.contador; i++)
+	{
+		auxFichas[i] = soporte.ficha[i];
+	}
+	delete[] soporte.ficha;
+	soporte.ficha = auxFichas;
+	soporte.capacidad = soporte.capacidad - 4;
+	auxFichas = nullptr;
 }
 void colorTexto(tColor color)//Da color a la ficha según el tipo definido tColor
 {
