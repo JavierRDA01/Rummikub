@@ -235,8 +235,10 @@ tFicha robar(tBolsa& bolsa)//Roba si se puede, una ficha de la bolsa y la añade
 	bool encontrado = false;
 	int iniFila, iniColumna, fila, columna;
 	tFicha ficha;
-	iniFila = rand() % 8;
-	iniColumna = rand() % NumFichas;
+	/*iniFila = rand() % 8;
+	iniColumna = rand() % NumFichas;*/
+	iniFila = 4;
+	iniColumna = 4;
 	fila = iniFila;
 	columna = iniColumna;
 	if (bolsa.ficha[iniFila][iniColumna] == NULL) //Si la ficha de la posición introducida está libre, entonces busca la siguiente icha a partir de esa posición
@@ -293,7 +295,7 @@ tFicha robar(tBolsa& bolsa)//Roba si se puede, una ficha de la bolsa y la añade
 	if (encontrado)
 	{
 		ficha = *bolsa.ficha[fila][columna];//Si finalmente encuentra la ficha, coge la ficha a partir de la posición encontrada
-		bolsa.ficha[fila][columna] = nullptr;
+		//bolsa.ficha[fila][columna] = NULL;
 	}
 	return ficha;
 }
