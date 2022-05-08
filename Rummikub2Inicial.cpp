@@ -76,14 +76,14 @@ int buscar(const tJugada& jugada, const tFicha& ficha);//Busca una ficha dentro 
 void eliminarFichas(tSoporte& soporte, const tJugada& jugada);//Elimina una ficha de un soporte
 bool ponerFicha(tJugada& jugada, tFicha& ficha);//Comprueba si es posible poner una ficha en una jugada a elegir del tablero. Si es así la pone.
 bool jugar(tTablero& tablero, tSoporte& soporte);//Llama a ponerFicha() o a nuevaJugada() dependiendo del número de fichas que queramos jugar
-void inicializarJugada(tJugada& jugada, int espacioJugada);
-void delBolsa(tBolsa& bolsa);
-void delSoportes(tSoportes& soportes);
-void delTablero(tTablero& tablero);
-void delJugada(tJugada& jugada);
-void reducirSoporte(tSoporte& soporte);
-int desempate(tSoportes soportes);
-void mensajeDeBienvenida();
+void inicializarJugada(tJugada& jugada, int espacioJugada);//Inicializa la jugada en memoria dinámica
+void delBolsa(tBolsa& bolsa);//Borra la memoria dinámica de la bolsa
+void delSoportes(tSoportes& soportes);//Borra la memoria dinámica de todos los soportes
+void delTablero(tTablero& tablero);//Borra la memoria dinámica del tablero
+void delJugada(tJugada& jugada);//Borra la memoria dinámica de la jugada 
+void reducirSoporte(tSoporte& soporte);//Reduce el tamaño del soporte para optimizar su memoria
+int desempate(tSoportes soportes);//Si las fichas de la bolsa se acaban muestra la opción 6, desempate. Al ejecutarla gana el jugador cuya suma de números de fichas del soporte sea menor
+void mensajeDeBienvenida();//Mensaje de bienvenida para el usuario :)
 
 
 int main()
