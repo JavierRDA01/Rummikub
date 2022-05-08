@@ -425,78 +425,52 @@ bool coloresRepetidos(tJugada& jugada)//Comprueba si hay por lo menos dos fichas
 }
 void mostrarSeries(tSoporte& soporte)//Muestra todas las posibles series que se pueden colocar directamentes desde un soporte
 {
-	tJugada jugadaAux, jugada;
-	tFicha elemento;
-	bool escalera = true, colorRepetido;
-	int fichasJugada = 0;
-	inicializarJugada(jugada, soporte.contador);
-	inicializarJugada(jugadaAux, soporte.contador);
-	for (int i = 0; i < soporte.contador; i++)
-	{
-		jugadaAux[i] = soporte.ficha[i];
+	tSoporte soporteAux;
+
+
+	bool serie = true, colorRepetido = false;
+	int fichasJugada, pos, j;
+	soporteAux.ficha = new tFicha[soporte.contador];
+
+	for (int i = 0; i < soporte.contador; i++) {
+		soporteAux.ficha[i] = soporte.ficha[i];
 	}
+	soporteAux.contador = soporte.contador;//Guarda el soporte en un auxiliar para que no se vea afectado el orden del soporte
+
 	ordenarPorNum(soporte);//Primero ordena por número
 
-	for (int i = 0; i < soporte.contador - 2; i++)
-	{
-		int numiguales = 1;
-		escalera = true;
+	for (int i = 0; i < soporte.contador; i++) {
+		tJugada jugada = new tFicha[4];
+		j = i;
+		fichasJugada = 0;
+		serie = true;
 
-		while (escalera)
-		{
-			if (soporte.ficha[i].numero == soporte.ficha[i + numiguales].numero && soporte.ficha[i].color != soporte.ficha[i + numiguales].color)//Si cumple las condiciones se suma el numero de fichas que las cumplen
-			{
-				numiguales++;
-			}
-			else
-			{
-				if (numiguales >= 3)//Si 3 fichas o más cumplen con las condiciones se pasa a ver si hay algún color repetido entre ellas
-				{
-					for (int j = i; j < i + numiguales; j++)
-					{
-						jugada[fichasJugada] = soporte.ficha[j];
-						fichasJugada++;
-					}
-					colorRepetido = coloresRepetidos(jugada);//Comprueba si hay colores repetidos
-					if (colorRepetido)//Si los hay elimina una de las fichas con el color repetido
-					{
-						for (int j = 0; j < fichasJugada - 1; j++)//Selecciona una a una las fichas del array
-						{
-							for (int k = j + 1; k < fichasJugada; k++)//Compara el color de la ficha seleccionada con todos los de las demás fichas de posiciones superiores
-							{
-								if (jugada[j].color == jugada[k].color)//Si los colores son iguales elimina la ficha y mueve las fichas que tenía delante una posición a la izquierda
-								{
-									jugada[k] = jugada[k + 1];
-									fichasJugada--;
-								}
-							}
-						}
-					}
-					if ((fichasJugada >= 3 && colorRepetido) || !colorRepetido)//Si se cumplen las condiciones 
-					{
-						for (int j = 0; j < fichasJugada; j++)//Muestra la jugada
-						{
-							mostrarFicha(jugada[j]);
-						}
-						for (int j = 0; j < fichasJugada; j++)//Vacía las fichas de la jugada
-						{
-							jugada[j].numero = -1;
-						}
-						cout << endl;
-					}
-					fichasJugada = 0;
-					colorRepetido = false;
+		while (serie && j < soporte.contador) {
+
+			if (soporte.ficha[i].numero == soporte.ficha[j].numero) {
+				if (i != j) 
+					for (int p = 0; p < 4; p++)
+						if (soporte.ficha[j].color == jugada[p].color)
+							colorRepetido = true;
+				
+				if (!colorRepetido) {
+					jugada[fichasJugada] = soporte.ficha[j];
+					fichasJugada++;
 				}
-				escalera = false;
 			}
+			else if (soporte.ficha[i].numero != soporte.ficha[j].numero)
+				serie = false;
+
+			if (fichasJugada > 2 && !colorRepetido && !serie) {
+				for (int m = 0; m < fichasJugada; m++)
+					mostrarFicha(jugada[m]);
+				cout << endl;
+			}
+			j++;
+			colorRepetido = false;
 		}
+		delete[] jugada;
 	}
-	for (int i = 0; i < soporte.contador; i++)
-	{
-		soporte.ficha[i] = jugadaAux[i];
-	}
-	delete[] jugadaAux;
-	delete[] jugada;
 }
 void mostrarEscaleras(tSoporte& soporte)// Muestra todas las posibles escaleras que se pueden colocar directamentes desde un soporte
 {
